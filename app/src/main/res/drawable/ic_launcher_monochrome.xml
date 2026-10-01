@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed-icon silhouette of the same board, stones, analysis path and spark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#00000000" android:strokeColor="#000000"
+        android:strokeWidth="2" android:strokeLineCap="round"
+        android:pathData="M48,30H61M78,48V60M60,78H38a8,8 0,0 1,-8,-8V48" />
+    <path android:fillColor="#00000000" android:strokeColor="#000000"
+        android:strokeWidth="2.7" android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M38,48v2q0,4 4,4h12m0,0V42q0,-4 4,-4h3M54,54v12q0,4 4,4h2" />
+    <path android:fillColor="#000000"
+        android:pathData="M50.6,54a3.4,3.4 0,1 0,6.8,0a3.4,3.4 0,1 0,-6.8,0M28,38a10,10 0,1 0,20,0a10,10 0,1 0,-20,0" />
+    <path android:fillColor="#000000" android:fillType="evenOdd"
+        android:pathData="M60,70a10,10 0,1 0,20,0a10,10 0,1 0,-20,0M62.4,70a7.6,7.6 0,1 0,15.2,0a7.6,7.6 0,1 0,-15.2,0" />
+    <path android:fillColor="#000000"
+        android:pathData="M70,30C71.5,35.5 72.5,36.5 78,38C72.5,39.5 71.5,40.5 70,46C68.5,40.5 67.5,39.5 62,38C67.5,36.5 68.5,35.5 70,30Z" />
+</vector>

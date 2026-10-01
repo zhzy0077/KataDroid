@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Vector transcription of design/icon/ai-foreground.svg, in its original 108-unit safe area. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#B9CFA6"
+        android:pathData="M38,30h32a8,8 0,0 1,8,8v32a8,8 0,0 1,-8,8H38a8,8 0,0 1,-8,-8V38a8,8 0,0 1,8,-8Z" />
+    <path android:fillColor="#00000000" android:strokeColor="#76956A"
+        android:strokeWidth="0.85" android:strokeAlpha="0.52"
+        android:pathData="M38,30v48M54,30v48M70,30v48M30,38h48M30,54h48M30,70h48" />
+    <path android:fillColor="#00000000" android:strokeColor="#28634E"
+        android:strokeWidth="2.7" android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M38,38v12q0,4 4,4h12m0,0V42q0,-4 4,-4h12M54,54v12q0,4 4,4h12" />
+    <path android:fillColor="#B9CFA6"
+        android:pathData="M48.7,54a5.3,5.3 0,1 0,10.6,0a5.3,5.3 0,1 0,-10.6,0" />
+    <path android:fillColor="#28634E"
+        android:pathData="M50.6,54a3.4,3.4 0,1 0,6.8,0a3.4,3.4 0,1 0,-6.8,0" />
+    <path android:fillColor="#253C30"
+        android:pathData="M28,38a10,10 0,1 0,20,0a10,10 0,1 0,-20,0" />
+    <path android:fillColor="#FFF8E9"
+        android:pathData="M60,70a10,10 0,1 0,20,0a10,10 0,1 0,-20,0" />
+    <path android:fillColor="#F5D985" android:strokeColor="#28634E"
+        android:strokeWidth="1.3" android:strokeLineJoin="round"
+        android:pathData="M70,30C71.5,35.5 72.5,36.5 78,38C72.5,39.5 71.5,40.5 70,46C68.5,40.5 67.5,39.5 62,38C67.5,36.5 68.5,35.5 70,30Z" />
+</vector>

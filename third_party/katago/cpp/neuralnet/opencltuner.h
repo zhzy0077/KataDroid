@@ -1,0 +1,336 @@
+#ifndef NEURALNET_OPENCL_TUNER_H_
+#define NEURALNET_OPENCL_TUNER_H_
+
+#include "../core/global.h"
+#include "../core/commontypes.h"
+#include "../core/logger.h"
+#include "../neuralnet/desc.h"
+#include "../neuralnet/nninputs.h"
+#include "../neuralnet/openclincludes.h"
+#include "../neuralnet/openclhelpers.h"
+
+namespace OpenCLParams {
+  struct XGemmDirectParams {
+    int WGD = 8;
+    int MDIMCD = 1;
+    int NDIMCD = 1;
+    int MDIMAD = 1;
+    int NDIMBD = 1;
+    int KWID = 1;
+    int VWMD = 1;
+    int VWND = 1;
+    int PADA = 1;
+    int PADB = 1;
+
+    std::string desc() const;
+    std::string compileOptions() const;
+    void fillFromDesc(const std::string& fileName, const std::string& desc);
+    bool isValid() const;
+  };
+
+  struct XGemmParams {
+    int MWG = 8;
+    int NWG = 8;
+    int KWG = 8;
+    int MDIMC = 1;
+    int NDIMC = 1;
+    int MDIMA = 1;
+    int NDIMB = 1;
+    int KWI = 1;
+    int VWM = 1;
+    int VWN = 1;
+    int STRM = 0;
+    int STRN = 0;
+    int SA = 0;
+    int SB = 0;
+
+    std::string desc() const;
+    std::string compileOptions() const;
+    void fillFromDesc(const std::string& fileName, const std::string& desc);
+    bool isValid() const;
+    bool isSimple() const;
+  };
+
+  struct HGemmWmmaParams {
+    int MWG = 16;
+    int NWG = 16;
+    int KWG = 16;
+    int MWAVE = 16;
+    int NWAVE = 16;
+    int MWARP = 16;
+    int NWARP = 16;
+    int VWM = 2;
+    int VWN = 2;
+    int SA = 0;
+    int SB = 0;
+
+    std::string desc() const;
+    std::string compileOptions() const;
+    void fillFromDesc(const std::string& fileName, const std::string& desc);
+    bool isValid() const;
+    bool isSimple() const;
+  };
+
+  struct HGemmWmmaNCHWParams {
+    // Maximum MWARP allowed for NCHW WMMA. Spatial padding (paddedNNXYLen) must be aligned
+    // to MWARP so that WMMA fragments don't straddle the boundary. Keeping this small
+    // minimizes wasted padding. Buffer overallocation also uses this as an upper bound.
+    static constexpr int MAX_MWARP = 16;
+
+    int MWG = 16;
+    int NWG = 16;
+    int KWG = 16;
+    int MWAVE = 16;
+    int NWAVE = 16;
+    int MWARP = 16;
+    int NWARP = 16;
+    int VWM = 1;
+    int VWN = 2;
+    int SB = 0;
+
+    // Pad kernel parameters (legacy, no longer tuned but kept for tune file compatibility)
+    int PAD_ELTS_PER_THREAD = 1;
+    int PAD_ROWS_PER_THREAD = 1;
+
+    std::string desc() const;
+    std::string compileOptions() const;
+    std::string padDesc() const;
+    std::string padCompileOptions() const;
+    int getRequiredCDivisor() const; // Use of HGemmWmmaNCHW on a matrix mult requires that input and output C is divisble by this
+    void fillFromDesc(const std::string& fileName, const std::string& desc);
+    bool isValid() const;
+    bool isSimple() const;
+  };
+
+  struct Conv3x3Params {
+    //Winograd input and output tile sizes
+    int INTILE_XSIZE = 4;
+    int INTILE_YSIZE = 4;
+    int OUTTILE_XSIZE = 2;
+    int OUTTILE_YSIZE = 2;
+
+    int transLocalSize0 = 1;
+    int transLocalSize1 = 1;
+
+    int untransLocalSize0 = 1;
+    int untransLocalSize1 = 1;
+    int untransLocalSize2 = 1;
+
+    std::string desc() const;
+    std::string transDesc() const;
+    std::string untransDesc() const;
+    std::string compileOptions() const;
+    void fillFromDesc(const std::string& fileName, const std::string& desc);
+    bool isValid() const;
+  };
+
+  struct Conv5x5Params {
+    //Winograd input and output tile sizes
+    int INTILE_XSIZE = 6;
+    int INTILE_YSIZE = 6;
+    int OUTTILE_XSIZE = 2;
+    int OUTTILE_YSIZE = 2;
+
+    int transLocalSize0 = 1;
+    int transLocalSize1 = 1;
+
+    int untransLocalSize0 = 1;
+    int untransLocalSize1 = 1;
+    int untransLocalSize2 = 1;
+
+    std::string desc() const;
+    std::string transDesc() const;
+    std::string untransDesc() const;
+    std::string compileOptions() const;
+    void fillFromDesc(const std::string& fileName, const std::string& desc);
+    bool isValid() const;
+  };
+
+  struct GPoolParams {
+    int XYSTRIDE = 1;
+    int CHANNELSTRIDE = 1;
+    int BATCHSTRIDE = 1;
+
+    std::string desc() const;
+    std::string compileOptions() const;
+    void fillFromDesc(const std::string& fileName, const std::string& desc);
+    bool isValid() const;
+  };
+
+  struct TransformerParams {
+    // Attention kernel parameters
+    int ATTN_BLOCK_Q = 32;   // query positions per workgroup (= workgroup size)
+    int ATTN_BLOCK_KV = 32;  // key/value tile size
+    int Q_PER_THREAD = 1;    // query positions per thread (workgroup handles ATTN_BLOCK_Q * Q_PER_THREAD total)
+    int USE_TILED_ATTN = 1;  // 1 = tiled (shared memory), 0 = naive (one work-item per query)
+
+    std::string desc() const;
+    std::string compileOptions() const;
+    void fillFromDesc(const std::string& fileName, const std::string& desc);
+    bool isValid() const;
+  };
+
+  struct TransformerRMSNormParams {
+    int WG_C_SIZE = 64;         // threads per workgroup for C-reduction
+    int WG_XY_SIZE = 1;         // spatial positions per workgroup
+    int C_PER_THREAD = 4;       // channels per thread per loop iteration
+
+    std::string desc() const;
+    std::string compileOptions() const;
+    void fillFromDesc(const std::string& fileName, const std::string& desc);
+    bool isValid() const;
+  };
+
+  struct PointWiseParams {
+    int ELTS_PER_THREAD = 1;  // elements per work-item in grid-stride loop
+    int LOCAL_SIZE = 32;      // workgroup size
+
+    std::string desc() const;
+    std::string compileOptions() const;
+    void fillFromDesc(const std::string& fileName, const std::string& desc);
+    bool isValid() const;
+  };
+
+  struct AddChannelBiasesNCHWParams {
+    int XY_ELTS_PER_THREAD = 1;  // spatial elements per work-item in grid-stride loop
+    int NC_ELTS_PER_THREAD = 1;  // batch*channel rows per work-item
+
+    std::string desc() const;
+    std::string compileOptions() const;
+    void fillFromDesc(const std::string& fileName, const std::string& desc);
+    bool isValid() const;
+  };
+
+  struct SpatialRMSNormParams {
+    int TILE_SIZE = 32;           // workgroup size for reduction kernels (passes 1 and 2)
+    int APPLY_ELTS_PER_THREAD = 1; // elements per work-item in apply kernel
+
+    std::string desc() const;
+    std::string reduceCompileOptions() const;
+    std::string applyCompileOptions() const;
+    void fillFromDesc(const std::string& fileName, const std::string& desc);
+    bool isValid() const;
+  };
+}
+
+struct OpenCLTuneParams {
+  OpenCLParams::XGemmDirectParams xGemmDirect = OpenCLParams::XGemmDirectParams();
+  OpenCLParams::XGemmParams xGemm = OpenCLParams::XGemmParams();
+
+  bool canUseFP16Storage = false;
+  bool canUseFP16Compute = false;
+  bool canUseFP16TensorCores = false;
+  bool canUseFP16TensorCoresFor1x1 = false;
+
+  bool shouldUseFP16Storage = false;
+  bool shouldUseFP16Compute = false;
+  OpenCLParams::XGemmParams xGemm16 = OpenCLParams::XGemmParams();
+  bool shouldUseFP16TensorCores = false;
+  bool shouldUseFP16TensorCoresFor1x1 = false;
+  OpenCLParams::HGemmWmmaParams hGemmWmma = OpenCLParams::HGemmWmmaParams();
+  OpenCLParams::HGemmWmmaNCHWParams hGemmWmmaNCHW = OpenCLParams::HGemmWmmaNCHWParams();
+
+  OpenCLParams::Conv3x3Params conv3x3 = OpenCLParams::Conv3x3Params();
+  OpenCLParams::Conv5x5Params conv5x5 = OpenCLParams::Conv5x5Params();
+  OpenCLParams::GPoolParams gPool = OpenCLParams::GPoolParams();
+  OpenCLParams::TransformerParams transformer = OpenCLParams::TransformerParams();
+  OpenCLParams::TransformerRMSNormParams transformerRMSNorm = OpenCLParams::TransformerRMSNormParams();
+  OpenCLParams::PointWiseParams pointWise = OpenCLParams::PointWiseParams();
+  OpenCLParams::AddChannelBiasesNCHWParams addChannelBiasesNCHW = OpenCLParams::AddChannelBiasesNCHWParams();
+  OpenCLParams::SpatialRMSNormParams spatialRMSNorm = OpenCLParams::SpatialRMSNormParams();
+
+  bool operator==(const OpenCLTuneParams& other) const;
+  bool isValid() const;
+
+  int getXGemmMPaddingMult(bool usingFP16Compute, bool usingFP16TensorCores) const;
+  int getXGemmNPaddingMult(bool usingFP16Compute, bool usingFP16TensorCores) const;
+  int getXGemmKPaddingMult(bool usingFP16Compute, bool usingFP16TensorCores) const;
+
+  // Compute the padded spatial dimension for NCHW layout. When using WMMA for 1x1 convolutions,
+  // rounds up to MWARP alignment (at least 16) so WMMA loads don't straddle spatial boundaries.
+  int getPaddedNNXYLen(int nnXLen, int nnYLen, bool usingFP16TensorCoresFor1x1) const;
+
+  static void save(const std::string& filename, const OpenCLTuneParams& config);
+  static OpenCLTuneParams load(const std::string& filename);
+};
+
+namespace OpenCLTuner {
+  constexpr int DEFAULT_X_SIZE = NNPos::MAX_BOARD_LEN;
+  constexpr int DEFAULT_Y_SIZE = NNPos::MAX_BOARD_LEN;
+  constexpr int DEFAULT_BATCH_SIZE = 4;
+  constexpr int DEFAULT_WINOGRAD_3X3_TILE_SIZE = 4;
+
+  struct ModelInfoForTuning {
+    int maxConvChannels1x1 = 0;
+    int maxConvChannels3x3 = 0;
+    int trunkNumChannels = 0;
+    int midNumChannels = 0;
+    int regularNumChannels = 0;
+    int gpoolNumChannels = 0;
+    int modelVersion = 0;
+
+    // Transformer-specific info (0 if no transformer blocks)
+    int transformerHeadDim = 0;
+    int transformerVHeadDim = 0;
+    int transformerNumHeads = 0;
+    int transformerNumKVHeads = 0;
+    int transformerFFNChannels = 0;
+
+    static ModelInfoForTuning ofDesc(const ModelDesc* desc);
+  };
+
+  void tune(
+    const OpenCLTuneParams& initialConfig,
+    const std::vector<DeviceInfo>& allDeviceInfos,
+    DevicesContext& devicesContext,
+    int gpuIdx,
+    int batchSize,
+    int nnXLen,
+    int nnYLen,
+    enabled_t testFP16Mode,
+    enabled_t testFP16StorageMode,
+    enabled_t testFP16ComputeMode,
+    enabled_t testFP16TensorCoresMode,
+    ModelInfoForTuning modelInfo,
+    bool full,
+    int winograd3x3TileSize,
+    Logger* logger,
+    std::ostream& out,
+    bool verboseErrors,
+    bool verboseTuner,
+    OpenCLTuneParams& tunedConfig
+  );
+
+  std::string defaultDirectory(bool makeDir, const std::string& homeDataDirOverride);
+  std::string defaultFileName(const std::string& gpuName, int nnXLen, int nnYLen, int trunkNumChannels, int modelVersion);
+  std::string defaultFileName(const std::string& gpuName, int nnXLen, int nnYLen, const ModelInfoForTuning& modelInfo);
+
+  OpenCLTuneParams loadOrAutoTune(
+    std::string openCLTunerFile,
+    const std::string& homeDataDirOverride,
+    const std::string& gpuName,
+    int gpuIdxForTuning,
+    Logger* logger,
+    bool openCLReTunePerBoardSize,
+    int nnXLen,
+    int nnYLen,
+    enabled_t testFP16Mode,
+    enabled_t testFP16StorageMode,
+    enabled_t testFP16ComputeMode,
+    enabled_t testFP16TensorCoresMode,
+    ModelInfoForTuning modelInfo,
+    bool full
+  );
+
+  void autoTuneEverything(
+    const std::string& homeDataDirOverride,
+    int gpuIdxForTuning,
+    Logger* logger,
+    enabled_t useFP16Mode,
+    bool full
+  );
+
+}
+
+
+#endif //NEURALNET_OPENCL_TUNER_H_

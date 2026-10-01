@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-02",
+  "environment": "Snapdragon 8 Elite, Android 17, arm64-v8a, debug build, LiteRT 2.2.0 / QNN 2.47.0",
+  "status": "Prior exploratory measurement. This b6 benchmark completed; the subsequent b10 NPU test process was killed. The combined suite and delegation audit did not complete. Not rerun for the repository preparation changes.",
+  "results": [
+    {
+      "method": "katago-1.18.2-search-v1",
+      "engine": "6611aa4aa2b6d51273337830ccd80884d8a1d3b46bb0a201e26cc3d798b35d72-NPU",
+      "model": "b6c96",
+      "backend": "NPU",
+      "visitsPerPosition": 500,
+      "initializationNanos": 71763230,
+      "warmupNanos": 69068646,
+      "samples": [
+        {
+          "label": "empty",
+          "visits": 500,
+          "nanos": 710004531
+        },
+        {
+          "label": "opening",
+          "visits": 500,
+          "nanos": 783573905
+        },
+        {
+          "label": "capture",
+          "visits": 500,
+          "nanos": 762199999
+        }
+      ]
+    }
+  ]
+}

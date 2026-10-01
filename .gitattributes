@@ -1,0 +1,10 @@
+* text=auto eol=lf
+*.bat text eol=crlf
+*.png -text
+*.webp -text
+*.jar -text
+*.tflite -text
+*.bin -text
+# Keep upstream bytes identical to upstream-files.json.
+third_party/** -text
+app/src/main/assets/licenses/** -text

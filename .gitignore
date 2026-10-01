@@ -1,0 +1,32 @@
+# Local IDE, SDK and Gradle state
+.idea/
+*.iml
+.gradle/
+.kotlin/
+local.properties
+**/build/
+.cxx/
+.externalNativeBuild/
+.DS_Store
+
+# Local validation, captures and downloaded model intermediates
+.local/
+captures/
+models/
+.venv*/
+__pycache__/
+*.py[cod]
+*.log
+
+# Generated vendor runtimes (tools/prepare_npu.py)
+/app/src/main/jniLibs/
+
+# Signing material and distributable packages
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+*.apk
+*.aab
+.env
+.env.*

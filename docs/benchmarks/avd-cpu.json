@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-02",
+  "environment": "Android Studio AVD, API 37, x86_64, 16 KiB pages, debug build",
+  "note": "Host-dependent development measurements; not representative of phone CPU speed.",
+  "results": [
+    {
+      "method": "katago-1.18.2-search-v2",
+      "engine": "6611aa4aa2b6d51273337830ccd80884d8a1d3b46bb0a201e26cc3d798b35d72-CPU",
+      "model": "b6c96",
+      "backend": "CPU",
+      "visitsPerPosition": 100,
+      "initializationNanos": 59139101,
+      "warmupNanos": 271902072,
+      "samples": [
+        {
+          "label": "empty",
+          "visits": 100,
+          "nanos": 822598319
+        },
+        {
+          "label": "opening",
+          "visits": 100,
+          "nanos": 834836059
+        },
+        {
+          "label": "capture",
+          "visits": 100,
+          "nanos": 805138287
+        }
+      ]
+    },
+    {
+      "method": "katago-1.18.2-search-v2",
+      "engine": "a4655e42d204ecb4ce3c181ff51401eabf9f165e21f31191a6096ba512165326-CPU",
+      "model": "b10c128",
+      "backend": "CPU",
+      "visitsPerPosition": 100,
+      "initializationNanos": 134605601,
+      "warmupNanos": 707987284,
+      "samples": [
+        {
+          "label": "empty",
+          "visits": 100,
+          "nanos": 1817036009
+        },
+        {
+          "label": "opening",
+          "visits": 100,
+          "nanos": 2504081872
+        },
+        {
+          "label": "capture",
+          "visits": 100,
+          "nanos": 2371690151
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+KataGo g170 neural network weights
+
+Sources:
+https://katagoarchive.org/g170/neuralnets/g170-b6c96-s175395328-d26788732.bin.gz
+https://katagoarchive.org/g170/neuralnets/g170e-b10c128-s1141046784-d204142634.bin.gz
+
+The official KataGo network license page, Exceptions section, states:
+"The oldest networks imported from prior runs before distributed training began,
+namely the ones marked on https://katagotraining.org/networks/ as belonging to the
+\"g170\" run, are not covered by the above license but rather are under CC0 and are
+effectively public domain."
+
+Source: https://katagotraining.org/network_license/
+CC0 1.0: https://creativecommons.org/publicdomain/zero/1.0/
+
+This notice covers the bundled g170 original descriptors and their TFLite
+conversions. It does not assert the same license for other KataGo models.
