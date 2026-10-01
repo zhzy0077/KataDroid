@@ -57,7 +57,7 @@ and candidate values come from real search.
 ## Build
 
 Use Android Studio with API 37 support, or the Gradle wrapper. Toolchain:
-Gradle 9.6.0, JDK 25 (Gradle daemon), Android SDK 37, Build Tools 36.0.0,
+Gradle 9.6.0, JDK 25 (Gradle daemon), Android SDK 37.0 (API 37), Build Tools 36.0.0,
 NDK 28.2.13676358 and CMake 3.22.1. Java source compatibility is 11.
 Set the SDK path through Android Studio or your own ignored `local.properties`.
 

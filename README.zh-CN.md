@@ -47,7 +47,7 @@ CPU 推理不依赖手机品牌。自动模式尝试安装包中的 NPU 运行�
 ## 构建
 
 需要支持 API 37 的 Android Studio，或使用 Gradle Wrapper：Gradle 9.6.0，Gradle 守护进程
-JDK 25，SDK 37、Build Tools 36.0.0、NDK 28.2.13676358、CMake 3.22.1。
+JDK 25，SDK 37.0（API 37）、Build Tools 36.0.0、NDK 28.2.13676358、CMake 3.22.1。
 通过 Android Studio 或本地 `local.properties` 设置 SDK 位置。模型已内置，CPU 构建无需 Python。
 
 ```bash
