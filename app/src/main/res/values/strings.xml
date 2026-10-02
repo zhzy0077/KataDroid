@@ -70,6 +70,7 @@
     <string name="pass_move">Pass</string>
     <string name="pause_auto">Pause automatic moves</string>
     <string name="resume_auto">Resume automatic moves</string>
+    <string name="resume_auto_action">Resume auto</string>
     <string name="import_sgf">Import SGF</string>
     <string name="export_sgf">Export SGF</string>
     <string name="status_off">Paused</string>

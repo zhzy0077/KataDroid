@@ -189,6 +189,50 @@ class SettingsFeatureUiTest {
         assertEquals(6, count())
     }
 
+    @Test fun pausedAutomaticTurnHasDirectResumeAndReenablesTheEngine() {
+        ui.runOnIdle {
+            document.updatePreferences(document.preferences.copy(maxVisits = 1, autoBlack = true, engineEnabled = false))
+            document.record.pauseAutomatic()
+        }
+        ui.onNodeWithTag("turn-label", useUnmergedTree = true).assertTextEquals("自动已暂停")
+        ui.onNodeWithTag("resume-automatic").assertIsDisplayed().assertIsEnabled().performClick()
+        waitForMoves(1)
+        assertTrue(document.preferences.engineEnabled)
+        assertTrue(document.record.autoPlayArmed)
+        assertEquals(listOf(1), document.record.position.moveColors)
+        ui.onNodeWithTag("resume-automatic").assertDoesNotExist() // White is manual.
+
+        ui.onNodeWithContentDescription("上一手").performClick()
+        assertFalse(document.record.autoPlayArmed)
+        ui.onNodeWithTag("resume-automatic").assertIsDisplayed().performClick()
+        waitForMoves(1)
+        assertEquals(listOf(1), document.record.position.moveColors)
+    }
+
+    @Test fun resumeActionSurvivesRecreationAndLandscapeButStaysHiddenDuringPreviewAndAfterGameOver() {
+        ui.runOnIdle {
+            document.updatePreferences(document.preferences.copy(maxVisits = 1, autoBlack = true, autoWhite = true, engineEnabled = false))
+            document.record.pauseAutomatic()
+        }
+        ui.activityRule.scenario.recreate()
+        ui.onNodeWithTag("resume-automatic").assertIsDisplayed()
+        ui.runOnUiThread { ui.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE }
+        ui.waitUntil(10000) { ui.activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE }
+        ui.onNodeWithTag("resume-automatic").assertIsDisplayed().assertIsEnabled()
+        ui.runOnIdle {
+            document.record.startPreview(com.example.katadroid.ui.record.Candidate("A", listOf(60)))
+        }
+        ui.onNodeWithTag("resume-automatic").assertDoesNotExist()
+        ui.runOnIdle { document.record.exitPreview() }
+        ui.onNodeWithTag("resume-automatic").assertIsDisplayed()
+        ui.runOnIdle {
+            assertTrue(document.record.play(com.example.katadroid.engine.PASS))
+            assertTrue(document.record.play(com.example.katadroid.engine.PASS))
+        }
+        ui.onNodeWithTag("resume-automatic").assertDoesNotExist()
+        ui.onNodeWithTag("turn-label").assertTextEquals("棋局结束")
+    }
+
     @Test fun selfPlayStopsForSettingsBackgroundAndEngineOff() {
         ui.runOnIdle { document.updatePreferences(document.preferences.copy(maxVisits = 32, autoBlack = true, autoWhite = true, engineEnabled = true)) }
         waitForMoves(4)

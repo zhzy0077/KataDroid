@@ -2,6 +2,7 @@ package com.example.katadroid.ui.record
 
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TextButton
 import com.example.katadroid.R
 import androidx.compose.foundation.background
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -103,7 +105,7 @@ fun RecordScreen(
                     RecordBoard(state, board, engine, settings, manualInput, Modifier.size(boardSize, boardSize + offsetHeight))
                     Column(Modifier.weight(1f).fillMaxSize()) {
                         header(true)
-                        Players(state, board, settings, Modifier.fillMaxWidth())
+                        Players(state, board, settings, onResumeAutomatic, Modifier.fillMaxWidth())
                         Transport(state)
                         CurrentAnalysis(state, viewport, engine, settings.engineEnabled, onRetry, Modifier.weight(1f).fillMaxWidth())
                         AnalysisTabs(state, insetBottom = false)
@@ -115,9 +117,9 @@ fun RecordScreen(
                 header(false)
                 BoxWithConstraints(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 10.dp)) {
                     val fontExtra = ((LocalDensity.current.fontScale - 1f).coerceAtLeast(0f) * 75).dp
-                    val boardSize = minOf(maxWidth, (maxHeight - (if (maxHeight < 550.dp) 276.dp else 310.dp) - fontExtra - offsetHeight).coerceAtLeast(120.dp))
+                    val boardSize = minOf(maxWidth, (maxHeight - (if (maxHeight < 550.dp) 292.dp else 326.dp) - fontExtra - offsetHeight).coerceAtLeast(120.dp))
                     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Players(state, board, settings, Modifier.fillMaxWidth())
+                        Players(state, board, settings, onResumeAutomatic, Modifier.fillMaxWidth())
                         RecordBoard(state, board, engine, settings, manualInput, Modifier.size(boardSize, boardSize + offsetHeight))
                         Transport(state)
                         Spacer(Modifier.height(4.dp))
@@ -222,9 +224,17 @@ private fun EngineSwitch(enabled: Boolean, phase: EnginePhase, onEnabled: (Boole
 }
 
 @Composable
-private fun Players(state: RecordUiState, board: BoardSnapshot, settings: AppPreferences, modifier: Modifier = Modifier) {
+private fun Players(state: RecordUiState, board: BoardSnapshot, settings: AppPreferences, onResumeAutomatic: () -> Unit,
+                    modifier: Modifier = Modifier) {
     val resources = LocalResources.current
-    Row(modifier.height(36.dp).padding(horizontal = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+    val automaticPaused = settings.automatic(if (board.blackToMove) 1 else 2) &&
+        (!state.autoPlayArmed || !settings.engineEnabled) && state.preview == null && !board.finished
+    val status = state.moveError?.let { resources.getString(it) } ?: state.preview?.let { resources.getString(R.string.preview_label, it.label) } ?: when {
+        board.finished -> resources.getString(R.string.game_over)
+        settings.automatic(if (board.blackToMove) 1 else 2) -> if (state.autoPlayArmed && settings.engineEnabled) resources.getString(R.string.player_thinking, resources.getString(if (board.blackToMove) R.string.black else R.string.white)) else resources.getString(R.string.auto_paused)
+        else -> resources.getString(R.string.player_turn, resources.getString(if (board.blackToMove) R.string.black else R.string.white))
+    }
+    Row(modifier.height(52.dp).padding(horizontal = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             PlayerStone(true)
             Column {
@@ -232,12 +242,23 @@ private fun Players(state: RecordUiState, board: BoardSnapshot, settings: AppPre
                 Text(resources.getString(R.string.captures, board.blackCaptures), fontSize = 10.sp, lineHeight = 13.sp, color = GoColors.Muted)
             }
         }
-        Text(state.moveError?.let { resources.getString(it) } ?: state.preview?.let { resources.getString(R.string.preview_label, it.label) } ?: when {
-            board.finished -> resources.getString(R.string.game_over)
-            settings.automatic(if (board.blackToMove) 1 else 2) -> if (state.autoPlayArmed && settings.engineEnabled) resources.getString(R.string.player_thinking, resources.getString(if (board.blackToMove) R.string.black else R.string.white)) else resources.getString(R.string.auto_paused)
-            else -> resources.getString(R.string.player_turn, resources.getString(if (board.blackToMove) R.string.black else R.string.white))
-        }, fontSize = 10.sp, lineHeight = 14.sp, color = GoColors.Primary, maxLines = 1, overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false).clip(RoundedCornerShape(20.dp)).background(GoColors.Container).padding(horizontal = 8.dp, vertical = 4.dp).testTag("turn-label"))
+        if (automaticPaused) {
+            TextButton(onClick = onResumeAutomatic,
+                modifier = Modifier.weight(1f, fill = false).height(48.dp).testTag("resume-automatic")
+                    .semantics { contentDescription = resources.getString(R.string.resume_auto) },
+                colors = ButtonDefaults.textButtonColors(containerColor = GoColors.Container, contentColor = GoColors.Primary),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(status, fontSize = 10.sp, lineHeight = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.testTag("turn-label"))
+                    Text(resources.getString(R.string.resume_auto_action), fontSize = 12.sp, lineHeight = 16.sp,
+                        fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        } else {
+            Text(status, fontSize = 10.sp, lineHeight = 14.sp, color = GoColors.Primary, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false).clip(RoundedCornerShape(20.dp)).background(GoColors.Container).padding(horizontal = 8.dp, vertical = 4.dp).testTag("turn-label"))
+        }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(horizontalAlignment = Alignment.End) {
                 Text(resources.getString(R.string.player_mode, resources.getString(R.string.white), resources.getString(if (settings.autoWhite) R.string.mode_auto else R.string.mode_manual)), fontSize = 12.sp, lineHeight = 16.sp, color = GoColors.Ink, fontWeight = FontWeight.SemiBold)

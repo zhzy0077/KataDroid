@@ -39,7 +39,10 @@ adjacent analyzed positions. Preview points never become real record nodes.
 The **Variations** tab displays the entire game tree. Tap a node to select a
 branch; drag to pan, pinch or use +/− to zoom, and use Current to return to the
 selected node. Playing from a historical node creates a variation. Navigation
-pauses automatic moves; resume them explicitly from the menu.
+pauses automatic moves. When the current player is automatic, the paused status
+shows a **Resume auto** button. It also enables KataGo if needed. The menu's
+**Resume automatic moves** action remains available. Importing or reopening a
+record also pauses automatic moves until explicitly resumed.
 
 <img src="images/variations-en.png" width="360" alt="Interactive game tree with branches and zoom controls" />
 

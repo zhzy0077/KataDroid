@@ -70,6 +70,7 @@
     <string name="pass_move">停一手</string>
     <string name="pause_auto">暂停自动落子</string>
     <string name="resume_auto">继续自动落子</string>
+    <string name="resume_auto_action">继续自动落子</string>
     <string name="import_sgf">导入 SGF</string>
     <string name="export_sgf">导出 SGF</string>
     <string name="status_off">已暂停</string>

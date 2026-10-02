@@ -14,6 +14,22 @@ class EnglishUiTest {
     @get:Rule(order = 0) val locale = AppLocaleRule("en")
     @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
 
+    @Test fun pausedAutomaticTurnOffersResumeInEnglish() {
+        lateinit var document: RecordViewModel
+        ui.runOnIdle {
+            document = ViewModelProvider(ui.activity)[RecordViewModel::class.java]
+            document.updatePreferences(AppPreferences(engineEnabled = false, autoBlack = true, maxVisits = 1))
+            document.record.newGame()
+            document.record.pauseAutomatic()
+        }
+        ui.onNodeWithTag("turn-label", useUnmergedTree = true).assertTextEquals("Auto paused")
+        ui.onNodeWithText("Resume auto").assertIsDisplayed()
+        ui.onNodeWithTag("resume-automatic").assertContentDescriptionEquals("Resume automatic moves").performClick()
+        ui.waitUntil(30000) { document.record.position.moves.size == 1 }
+        assertTrue(document.preferences.engineEnabled)
+        ui.runOnIdle { document.updatePreferences(AppPreferences(engineEnabled = false)); document.record.reset() }
+    }
+
     @Test fun englishSettingsApplyAsOneDraftAndGameActionsLiveOnlyInTheMenu() {
         lateinit var document: RecordViewModel
         ui.runOnIdle {
