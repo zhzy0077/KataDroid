@@ -42,6 +42,49 @@ This screenshot shows a separate AVD run using Auto, which selected CPU. Its
 125.4 visits/s result illustrates the report; the recorded baseline below comes
 from a different run.
 
+## Amended official v1.0.0 (version code 1003)
+
+The P0 combined-dispatch bug was fixed and the maintainer requested an amended
+v1.0.0. The tag points to `69f68fd82531132a47c26fcbb5ac2a558952a36e`;
+the [official Release APK workflow](https://github.com/zhzy0077/KataDroid/actions/runs/37034321350)
+built and signed universal, arm64-v8a and x86_64 APKs. All downloaded APKs matched
+published checksums; the arm64 signing certificate matches the original release.
+Both physical devices received the actual arm64 asset, not a locally built substitute.
+
+Measured on 2026-10-03 with three trials per configuration, each using a fresh
+production-controller session, a 32-visit warm-up and three fresh positions at
+500 visits each. Initialization and warm-up are excluded. The app remained awake
+in the foreground and ordinary analysis was temporarily paused, then restored.
+The user enabled performance mode on Dimensity; Snapdragon's setting was not recorded.
+
+| SoC / actual backend / model | Median visits/s | Trial range visits/s |
+| --- | ---: | ---: |
+| Snapdragon 8 Elite / NPU / b6c96 | 776.0 | 770.4–780.6 |
+| Snapdragon 8 Elite / NPU / b10c128 | 499.5 | 491.0–504.6 |
+| Dimensity 9300 / CPU / b6c96 | 94.6 | 94.1–94.6 |
+| Dimensity 9300 / CPU / b10c128 | 21.2 | 20.3–21.6 |
+| Dimensity 9300 / NPU / b6c96 | 340.1 | 338.7–340.2 |
+| Dimensity 9300 / NPU / b10c128 | 272.8 | 270.7–274.0 |
+
+Native logs verified complete XNNPACK CPU or vendor DispatchDelegate NPU graphs,
+with QNN/FastRPC/DMA-BUF on Snapdragon and Neuron/AHWB/DMA-BUF on Dimensity.
+All six Snapdragon NPU and six Dimensity CPU runtime openings have delegate
+records. Dimensity NPU logs retained one graph assignment per model, rather than
+all three openings; all rounds passed strict NPU buffer/backend checks. Its
+per-trial native trace is therefore incomplete. Both devices passed b6/b10 numerical,
+search/cancellation/restart/model-switch and timed-search tests. Both completed
+all 51 sample positions at 500 visits each, then searched the selected position
+beyond 500. These are engine integration tests, not substitutes for AVD UI tests.
+
+These are short tests, not sustained thermal, battery or playing-strength results.
+Snapdragon CPU performance was not measured. Older APK measurements below are
+retained with their original digests and version codes.
+
+Sanitized build identities, all timings and per-position counters:
+[Snapdragon production results](benchmarks/snapdragon-8-elite-amended-release.json),
+[Dimensity production results](benchmarks/dimensity-9300-amended-release.json),
+and [official release validation](benchmarks/amended-v1.0.0-validation.json).
+
 ## Original production v1.0.0 (version code 1002): Dimensity 9300
 
 Measured on 2026-10-02 using the APK downloaded from the published v1.0.0 release,
@@ -137,8 +180,8 @@ they do not substitute for AVD UI regression tests. The UI supplies this same
 record history and enables continuous analysis in manual review mode. During
 history completion, the selected position can remain at its initial visit budget.
 
-The candidate is installed on the test devices. At the maintainer’s request,
-v1.0.0 is being amended through the official release workflow with this fix.
+The candidate preceded the official amended v1.0.0 rebuild and device
+verification documented above.
 The original production timings above identify the original APK by version code
 and digest; they are not measurements of the amended APK.
 Sanitized build identity and validation:

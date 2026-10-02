@@ -65,17 +65,16 @@ APK, the device's vendor drivers and the selected network.
 
 | Device / SoC or environment | Backend | Current test coverage |
 | --- | --- | --- |
-| Qualcomm Snapdragon 8 Elite device | LiteRT / QNN NPU | Both models passed numerical, search, cancellation/restart and native delegation checks in the 1.0.1 release candidate. The original v1.0.0 had a combined-plugin selection bug; the amended release uses the fix below. |
+| Qualcomm Snapdragon 8 Elite device | LiteRT / QNN NPU | Both models passed numerical, search, cancellation/restart, full-record continuous analysis and native delegation checks on the amended v1.0.0 APK (version code 1003). |
 | MediaTek Dimensity 9300 (MT6989) device | LiteRT / Neuron NPU, experimental | b6c96 and b10c128 numerical, search/lifecycle and benchmark checks passed with native delegation evidence, using patched plugins. |
 | Android Studio x86_64 AVD, API 37 | CPU | UI and CPU regression baseline; performance depends on the host computer. |
 | Other phones / SoCs | CPU; NPU where a compatible runtime is available | Compatibility feedback welcome. The results above do not establish support for other SoC generations or every phone with the same SoC. |
 
-**Original v1.0.0 Qualcomm issue:** when both vendors’ dispatch plugins are packaged,
-LiteRT can load the MediaTek plugin on a Snapdragon device and fail with
-`HostMemory`. The source fix isolates the selected vendor’s compiler and dispatch
-libraries. It passed NPU audits on Snapdragon 8 Elite and Dimensity 9300 using a
-release-signed 1.0.1 candidate. The amended v1.0.0 is being rebuilt through the
-official release workflow with this fix and a higher Android version code.
+**Amended v1.0.0:** the original APK could load MediaTek dispatch on Qualcomm
+and fail with `HostMemory`. The official release workflow rebuilt all three APKs
+with vendor-specific plugin directories. The new APKs use version code **1003**
+(original: 1002), keep the same signing key, and passed NPU validation on both
+SoCs. Re-download and install the APK to upgrade in place.
 
 A clean checkout builds a **CPU-capable APK**. NPU plugins are optional:
 see [NPU setup](docs/npu.md) for Qualcomm setup and the experimental MediaTek
@@ -88,24 +87,24 @@ Check the actual backend shown in the app when reporting a result.
 
 These are real KataGo search **visits per second**, including search and inference
 work. Initialization and warm-up are excluded. Each run measures three fresh
-positions after a 32-visit warm-up. The production rows are medians of three
-trials on the original published **v1.0.0** APK (version code 1002); the other rows are debug measurements.
+positions after a 32-visit warm-up. Production rows are medians of three trials
+on the amended **v1.0.0** arm64 APK, version code **1003**.
 
 | Environment / actual backend | Visits per position | b6c96 visits/s | b10c128 visits/s |
 | --- | ---: | ---: | ---: |
-| Snapdragon 8 Elite / NPU, Android 17 | 500 | 665.0 (exploratory) | Unverified |
-| Dimensity 9300 (MT6989) / CPU, Android 16, v1.0.0 | 500 | 94.1 | 21.3 |
-| Dimensity 9300 (MT6989) / NPU, Android 16, v1.0.0 | 500 | 343.4 | 271.5 |
-| Android Studio API 37 AVD / CPU | 100 | 121.8 | 44.8 |
+| Snapdragon 8 Elite / NPU, Android 17, v1.0.0 | 500 | 776.0 | 499.5 |
+| Dimensity 9300 (MT6989) / CPU, Android 16, v1.0.0 | 500 | 94.6 | 21.2 |
+| Dimensity 9300 (MT6989) / NPU, Android 16, v1.0.0 | 500 | 340.1 | 272.8 |
+| Android Studio API 37 AVD / CPU, debug | 100 | 121.8 | 44.8 |
 
-The Dimensity 9300 production tests passed for both models on CPU and NPU;
-native logs confirmed full Neuron delegation with LiteRT 2.2.0 / Neuron USDK
-8.2.26. With performance mode enabled by the user, CPU ranges were: **93.5–95.0 visits/s** for b6c96 and
-**21.1–21.4** for b10c128. NPU ranges were 341.5–362.6 and
-270.5–271.5 respectively. These are short foreground runs, with normal
-analysis paused, and do not establish sustained thermal performance or playing strength.
-The user-reported b6 result of 480 visits/s was not reproduced in this batch. AVD figures
-depend on the host computer and cannot be compared with phone results as a speedup.
+Native logs confirmed complete vendor NPU delegation for both models.
+Snapdragon NPU trial ranges were 770.4–780.6 / 491.0–504.6 visits/s
+(b6 / b10); its performance-mode setting was not recorded. Dimensity had
+performance mode enabled by the user: CPU ranges were 94.1–94.6 /
+20.3–21.6, and NPU ranges 338.7–340.2 / 270.7–274.0.
+These short foreground tests exclude initialization and warm-up, with ordinary
+analysis paused. They do not establish sustained thermal performance or playing
+strength. AVD figures depend on the host computer.
 
 See [models, methodology and sanitized measurements](docs/models-and-benchmarks.md)
 for timings, runtime details and validation limits. In the app, open
