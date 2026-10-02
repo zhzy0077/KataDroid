@@ -48,6 +48,10 @@ once at the bottom. If automatic play is paused, tap **Resume auto** in the
 player status area to continue. Open **Engines & models** to choose a model and
 benchmark it.
 
+The visit setting is the initial budget for each position. The app fills the
+record history at that budget before continuously deepening the selected position.
+Its visit counter can stay at 500 while historical positions are being analyzed.
+
 Android 13+ supports choosing English or Chinese in system Settings → Apps →
 KataDroid → Language. The app initially opens the first 50 moves of AlphaGo–Lee Sedol, game 4
 (2016-03-13); analysis and candidate values come from real search.
@@ -61,10 +65,16 @@ APK, the device's vendor drivers and the selected network.
 
 | Device / SoC or environment | Backend | Current test coverage |
 | --- | --- | --- |
-| Qualcomm Snapdragon 8 Elite device | LiteRT / QNN NPU | b6c96 numerical, search and native delegation checks passed. The combined both-model benchmark/lifecycle audit did not complete; b10c128 performance remains unverified. |
+| Qualcomm Snapdragon 8 Elite device | LiteRT / QNN NPU | Both models passed numerical, search, cancellation/restart and native delegation checks in the 1.0.1 release candidate. **Published v1.0.0 has a combined-plugin selection bug on Qualcomm; see below.** |
 | MediaTek Dimensity 9300 (MT6989) device | LiteRT / Neuron NPU, experimental | b6c96 and b10c128 numerical, search/lifecycle and benchmark checks passed with native delegation evidence, using patched plugins. |
 | Android Studio x86_64 AVD, API 37 | CPU | UI and CPU regression baseline; performance depends on the host computer. |
 | Other phones / SoCs | CPU; NPU where a compatible runtime is available | Compatibility feedback welcome. The results above do not establish support for other SoC generations or every phone with the same SoC. |
+
+**v1.0.0 Qualcomm issue:** when both vendors’ dispatch plugins are packaged,
+LiteRT can load the MediaTek plugin on a Snapdragon device and fail with
+`HostMemory`. The source fix isolates the selected vendor’s compiler and dispatch
+libraries. It passed NPU audits on Snapdragon 8 Elite and Dimensity 9300 using a
+release-signed 1.0.1 candidate; that candidate is not yet a published release.
 
 A clean checkout builds a **CPU-capable APK**. NPU plugins are optional:
 see [NPU setup](docs/npu.md) for Qualcomm setup and the experimental MediaTek
@@ -77,20 +87,24 @@ Check the actual backend shown in the app when reporting a result.
 
 These are real KataGo search **visits per second**, including search and inference
 work. Initialization and warm-up are excluded. Each run measures three fresh
-positions after a 32-visit warm-up; all results below use debug builds.
+positions after a 32-visit warm-up. The production rows are medians of three
+trials on the published **v1.0.0** APK; the other rows are debug measurements.
 
 | Environment / actual backend | Visits per position | b6c96 visits/s | b10c128 visits/s |
 | --- | ---: | ---: | ---: |
 | Snapdragon 8 Elite / NPU, Android 17 | 500 | 665.0 (exploratory) | Unverified |
-| MediaTek Dimensity 9300 (MT6989) / NPU, Android 16 | 500 | 276.1 | 225.9 |
+| Dimensity 9300 (MT6989) / CPU, Android 16, v1.0.0 | 500 | 94.1 | 21.3 |
+| Dimensity 9300 (MT6989) / NPU, Android 16, v1.0.0 | 500 | 343.4 | 271.5 |
 | Android Studio API 37 AVD / CPU | 100 | 121.8 | 44.8 |
 
-The Snapdragon b6 result is from a completed individual measurement; the combined
-both-model audit was interrupted. The MediaTek results are from a completed
-native delegation audit with LiteRT 2.2.0 and Neuron USDK 8.2.26. AVD numbers are
-host-dependent simulator results, not phone CPU measurements, so these rows
-cannot establish a CPU-to-NPU speedup. Short runs do not establish sustained
-thermal performance, battery use or playing strength.
+The Dimensity 9300 production tests passed for both models on CPU and NPU;
+native logs confirmed full Neuron delegation with LiteRT 2.2.0 / Neuron USDK
+8.2.26. With performance mode enabled by the user, CPU ranges were: **93.5–95.0 visits/s** for b6c96 and
+**21.1–21.4** for b10c128. NPU ranges were 341.5–362.6 and
+270.5–271.5 respectively. These are short foreground runs, with normal
+analysis paused, and do not establish sustained thermal performance or playing strength.
+The user-reported b6 result of 480 visits/s was not reproduced in this batch. AVD figures
+depend on the host computer and cannot be compared with phone results as a speedup.
 
 See [models, methodology and sanitized measurements](docs/models-and-benchmarks.md)
 for timings, runtime details and validation limits. In the app, open

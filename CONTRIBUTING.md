@@ -63,6 +63,39 @@ Never imply a skipped or incomplete hardware audit passed.
 Sign release APKs outside Git. Preserve `LICENSE` and third-party notices when
 distributing source or binaries; optional vendor runtimes have their own terms.
 
+## Scheduled production performance tests
+
+`ProductionBenchmarkTest` requires an installed, non-debuggable release APK and
+an instrumentation APK signed with the same release key. Its native libraries
+come from the production app. Debug-app runs skip this test.
+
+For explicitly scheduled physical CPU/NPU performance work, select the connected
+serial first. The test keeps the app in the foreground, temporarily pauses its
+ordinary analysis, and restores that preference afterward. A temporary activity
+flag keeps the screen awake; system display settings stay unchanged. It measures three
+fresh positions at 500 visits each, with a 32-visit warm-up per trial, and saves
+the median result in the app. Run each model/backend in a separate invocation:
+
+```bash
+adb devices -l
+adb -s <test-serial> shell am instrument -w -r \
+  -e class io.github.zhzy0077.katadroid.ProductionBenchmarkTest \
+  -e backend CPU -e model b10c128 -e rounds 3 -e controllerPath true \
+  io.github.zhzy0077.katadroid.test/androidx.test.runner.AndroidJUnitRunner \
+  > .local/production-CPU-b10.log
+```
+
+For scheduled release NPU integration, use the same class with
+`-e backend NPU -e model b6c96 -e verifySuite true` for numerical/lifecycle checks,
+or `-e verifyHistory true` for all 51 sample positions at 500 visits followed by
+continuous selected-position search beyond 500. Audit the native logs as well.
+
+Repeat with `CPU` / `NPU` and `b6c96` / `b10c128`. Require completed trials and
+passing instrumentation; for NPU, also audit native delegation and vendor graph
+loading as in the dedicated NPU checks above. Keep raw reports out of Git and
+publish only sanitized counters, timings and build identity. Routine CPU and UI
+regression tests still use Android Studio AVDs.
+
 ## Tagged APK releases
 
 [Release APK](.github/workflows/release.yml) runs when a tag such as `v1.0.0` or
@@ -80,8 +113,8 @@ The original universal APK and published tag stay unchanged.
 All APKs contain both bundled models and CPU inference. Arm64 and universal
 APKs also contain Qualcomm NPU plugins and experimental MediaTek NPU plugins
 built with the runtime selection patch. The workflow checks ABI contents and
-both vendors' arm64 plugins before publishing. Plugin packaging does not validate execution on every SoC; physical NPU audits and AVD
-UI tests remain separate checks.
+both vendors' arm64 plugins before publishing. Plugin packaging does not validate
+execution on every SoC; physical NPU audits and AVD UI tests remain separate checks.
 
 MediaTek's hermetic host compiler dependencies need substantial disk space. The
 release job removes unused preinstalled toolchains and emulator images on its

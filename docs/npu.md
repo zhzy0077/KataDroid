@@ -20,6 +20,23 @@ with every other Qualcomm generation. Experimental MediaTek setup is below;
 Samsung plugins are not bundled.
 See [third-party terms](../THIRD_PARTY_NOTICES.md) before distributing their binaries.
 
+## Combined-vendor plugin selection
+
+LiteRT 2.2.0 scans the dispatch directory and chooses the first matching library.
+The v1.0.0 combined APK could therefore load MediaTek dispatch on a Qualcomm
+phone, fail to initialize Neuron, and expose `HostMemory` buffers. The strict
+buffer validation correctly rejected that execution.
+
+The source fix prepares a vendor-specific directory with symlinks to that vendor's
+packaged compiler/dispatch libraries, plus QNN support libraries on Qualcomm.
+Both LiteRT plugin-directory options use this directory. Compiler loading uses the
+original extracted library path; links are repaired after an APK update. Packaged
+native files stay intact. NPU buffers and native delegation still require validation.
+The release-signed 1.0.1 candidate passed the numerical, both-model search,
+cancellation/restart and timed-search suites on Snapdragon 8 Elite and Dimensity
+9300. These checks do not change the published v1.0.0 APK. Sanitized evidence is in
+[vendor-isolation-validation.json](benchmarks/vendor-isolation-validation.json).
+
 ## Audit on an explicitly selected device
 
 Install both APKs using `adb -s <serial>` after inspecting `adb devices -l`.
@@ -97,6 +114,6 @@ driver logging can lose the final application log records. The probe suite now r
 CPU numerical tests remain on an AVD.
 
 No new physical-device run is required for UI or CPU changes. The current known
-coverage and incomplete b10 NPU lifecycle run are documented in
-[performance notes](models-and-benchmarks.md), alongside the completed MediaTek
-MT6989 audit. The incomplete b10 run refers to the earlier Qualcomm testing.
+coverage and earlier incomplete b10 NPU lifecycle run are documented in
+[performance notes](models-and-benchmarks.md), alongside the completed MediaTek Dimensity 9300
+(MT6989) audit. The incomplete b10 run refers to the earlier Qualcomm testing.

@@ -59,9 +59,9 @@ class LiteRtNetwork private constructor(
                  modelSpec: KataGoModel = KataGoModel.B6): LiteRtNetwork {
             require(accelerator == Accelerator.CPU || accelerator == Accelerator.NPU)
             val descriptor = prepareModel(context, modelSpec)
-            val nativeDir = context.applicationInfo.nativeLibraryDir
             val npu = accelerator == Accelerator.NPU
-            if (npu) NpuProbe.loadCompiler(context)
+            val nativeDir = if (npu) NpuProbe.loadCompiler(context).absolutePath
+                else context.applicationInfo.nativeLibraryDir
             Log.i(TAG, "BEGIN backend=$accelerator model=${modelSpec.id}")
             val environment = Environment.create(context, if (npu) mapOf(
                 Environment.Option.CompilerPluginLibraryDir to nativeDir,

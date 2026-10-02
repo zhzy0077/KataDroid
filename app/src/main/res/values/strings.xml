@@ -225,4 +225,5 @@
     <string name="touch_offset_indicator">Touch offset: %1$d px up</string>
     <string name="player_name_rank">%1$s %2$s</string>
     <string name="player_mode_captures">%1$s · Captured %2$d</string>
+    <string name="npu_runtime_prepare_failed">Could not prepare the %1$s NPU runtime.</string>
 </resources>

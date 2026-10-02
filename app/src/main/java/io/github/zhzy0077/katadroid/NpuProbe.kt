@@ -52,10 +52,23 @@ object NpuProbe {
 
     fun hasRuntimeLibraries(context: Context): Boolean = vendor(context) != null
 
-    fun loadCompiler(context: Context) {
+    @Synchronized
+    fun loadCompiler(context: Context): File {
         val selected = checkNotNull(vendor(context)) { context.getString(R.string.npu_unavailable) }
-        System.load(File(context.applicationInfo.nativeLibraryDir, selected.compiler).absolutePath)
+        val nativeDirectory = File(context.applicationInfo.nativeLibraryDir)
+        val directory = try {
+            NpuRuntimeDirectory.prepare(
+                File(context.noBackupFilesDir, "npu-runtime/${selected.name.lowercase(Locale.ROOT)}"),
+                nativeDirectory, selected.compiler, "libLiteRtDispatch_${if (selected == Vendor.QUALCOMM) "Qualcomm" else "MediaTek"}.so",
+                includeQnn = selected == Vendor.QUALCOMM,
+            )
+        } catch (error: Exception) {
+            Log.e("KataDroidEngine", "Cannot isolate selected NPU libraries", error)
+            throw java.io.IOException(context.getString(R.string.npu_runtime_prepare_failed, selected.name), error)
+        }
+        System.load(File(nativeDirectory, selected.compiler).absolutePath)
         Log.i("KataDroidEngine", "NPU vendor=$selected")
+        return directory
     }
 
     fun options(context: Context, accelerator: Accelerator): CompiledModel.Options =
@@ -76,8 +89,8 @@ object NpuProbe {
     }
 
     suspend fun run(context: Context, accelerator: Accelerator): Result = withContext(Dispatchers.Default) {
-        val nativeDir = context.applicationInfo.nativeLibraryDir
-        if (accelerator == Accelerator.NPU) loadCompiler(context)
+        val nativeDir = if (accelerator == Accelerator.NPU) loadCompiler(context).absolutePath
+            else context.applicationInfo.nativeLibraryDir
         val envOptions = if (accelerator == Accelerator.NPU) mapOf(
             Environment.Option.CompilerPluginLibraryDir to nativeDir,
             Environment.Option.DispatchLibraryDir to nativeDir,

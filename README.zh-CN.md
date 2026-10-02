@@ -6,8 +6,9 @@
 使用官方 KataGo 的规则与搜索，通过 LiteRT 在本机完成神经网络推理，无需账号或分析服务器。
 
 <p align="center">
-  <img src="docs/images/analysis-zh.png" width="45%" alt="棋盘、候选点和可点击的胜率走势" />
-  <img src="docs/images/settings-zh.png" width="45%" alt="使用底部统一应用按钮的设置页" />
+  <img src="docs/images/analysis-zh.png" width="31%" alt="棋盘、候选点和可点击的胜率走势" />
+  <img src="docs/images/settings-zh.png" width="31%" alt="使用底部统一应用按钮的设置页" />
+  <img src="docs/images/engine-zh.png" width="31%" alt="模型选择、CPU/NPU 后端与搜索测速" />
 </p>
 
 ## 功能
@@ -52,6 +53,30 @@ CPU 推理不依赖手机品牌。自动模式尝试安装包中的 NPU 运行�
 日常界面、功能和 CPU 测试使用 Android Studio 模拟器；真机 NPU 验证覆盖了
 **Snapdragon 8 Elite 和 MediaTek Dimensity 9300 (MT6989)**。这是测试覆盖范围，不是 App 使用限制。
 性能数据、统计口径和未完成的验证见[模型与性能说明](docs/models-and-benchmarks.md)。
+
+v1.0.0 同时打包两家厂商的插件时，LiteRT 可能在骁龙设备上误选 MediaTek
+dispatch，导致 `HostMemory` 验证失败。源码已隔离厂商插件目录，签名的 1.0.1
+候选版本已通过骁龙 8 Elite 和天玑 9300 的双模型 NPU 数值及生命周期验证；
+该候选版本尚未正式发布。
+
+visits 设置是每个局面的初始分析预算。分析器先补齐历史局面，再持续加深
+当前局面；补齐历史期间，当前局面的计数可能暂时停在 500。
+
+## 实测性能
+
+Dimensity 9300（MT6989）、Android 16、正式发布的 **v1.0.0** APK。
+每次预热 32 visits，再测三个全新局面，每局面 500 visits；下表为三次完整测速的中位数。
+初始化和预热不计入搜索速度，NPU 已通过原生日志确认完整 Neuron 委派。
+
+| 实际后端 | b6c96 visits/s | b10c128 visits/s |
+| --- | ---: | ---: |
+| CPU | 94.1 | 21.3 |
+| NPU | 343.4 | 271.5 |
+
+用户已开启性能模式。CPU 范围：b6c96 为 93.5–95.0，b10c128 为 21.1–21.4 visits/s；
+NPU 分别为 341.5–362.6 和 270.5–271.5。本批次未复现用户报告的 b6 480 visits/s。前台短时测速不代表持续负载表现或棋力。
+欢迎反馈其他设备的兼容性、失败情况和性能，附上机型、SoC、Android 版本、模型、实际后端与 visits/s。
+完整数据见[模型与性能说明](docs/models-and-benchmarks.md)。
 
 ## 构建
 

@@ -55,9 +55,9 @@ object KataGoProbe {
         }
         val hash = digest.digest().joinToString("") { "%02x".format(it.toInt() and 255) }
         check(hash == fixtures.getString("tfliteSha256") && hash == modelSpec.sha256) { "SHA-256 mismatch between model and reference" }
-        val nativeDir = context.applicationInfo.nativeLibraryDir
         val isNpu = accelerator == Accelerator.NPU
-        if (isNpu) NpuProbe.loadCompiler(context)
+        val nativeDir = if (isNpu) NpuProbe.loadCompiler(context).absolutePath
+            else context.applicationInfo.nativeLibraryDir
         val envOptions = if (isNpu) mapOf(
             Environment.Option.CompilerPluginLibraryDir to nativeDir,
             Environment.Option.DispatchLibraryDir to nativeDir,

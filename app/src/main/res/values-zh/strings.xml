@@ -225,4 +225,5 @@
     <string name="touch_offset_indicator">触点上移 %1$d px</string>
     <string name="player_name_rank">%1$s %2$s</string>
     <string name="player_mode_captures">%1$s · 提子 %2$d</string>
+    <string name="npu_runtime_prepare_failed">无法准备 %1$s NPU 运行时。</string>
 </resources>
