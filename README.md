@@ -47,11 +47,12 @@ and candidate values come from real search.
   device-model or SoC allowlist.
 - Auto tries an installed NPU runtime and falls back to CPU if initialization
   fails. Explicit NPU mode reports errors rather than silently changing backend.
-- The optional NPU integration currently packages Qualcomm LiteRT/QNN runtimes.
-  Support depends on the runtime, drivers, model and hardware. Other vendors can
-  still run on CPU; this build does not include MediaTek or Samsung NPU plugins.
+- Optional NPU integrations include Qualcomm LiteRT/QNN and experimental MediaTek
+  Neuron plugins built from patched LiteRT source. See [NPU setup](docs/npu.md).
+  Support depends on the runtime, drivers, model and hardware. Samsung NPU
+  plugins are not included.
 - UI and CPU regression testing uses Android Studio AVDs. Physical NPU validation
-  so far has covered **Snapdragon 8 Elite only**; this is a test coverage statement,
+  so far has covered **Snapdragon 8 Elite and MediaTek MT6989**; this is test coverage,
   not an app restriction. See the [performance notes](docs/models-and-benchmarks.md).
 
 ## Build

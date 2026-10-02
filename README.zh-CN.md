@@ -37,11 +37,11 @@
 
 Android 13 / API 33 及以上，提供 arm64-v8a 和 x86_64 构建，**不按机型或 SoC 设置白名单**。
 CPU 推理不依赖手机品牌。自动模式尝试安装包中的 NPU 运行时，初始化失败时使用 CPU；
-手选 NPU 会明确报告错误。当前可选 NPU 集成使用 Qualcomm LiteRT/QNN 库，其他厂商仍可使用 CPU，
-尚未打包 MediaTek、Samsung 等厂商的 NPU 插件。
+手选 NPU 会明确报告错误。可选 NPU 集成包括 Qualcomm LiteRT/QNN 和实验性的 MediaTek Neuron；
+联发科插件需要从带补丁的 LiteRT 源码构建，见 [NPU setup](docs/npu.md)。尚未接入 Samsung NPU。
 
-日常界面、功能和 CPU 测试使用 Android Studio 模拟器；此前真机 NPU 验证只覆盖了
-**Snapdragon 8 Elite**。这是测试覆盖范围，不是 App 使用限制。
+日常界面、功能和 CPU 测试使用 Android Studio 模拟器；真机 NPU 验证覆盖了
+**Snapdragon 8 Elite 和 MediaTek MT6989**。这是测试覆盖范围，不是 App 使用限制。
 性能数据、统计口径和未完成的验证见[模型与性能说明](docs/models-and-benchmarks.md)。
 
 ## 构建

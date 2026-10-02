@@ -59,7 +59,7 @@ against reference positions, separately from throughput measurements.
 
 ## Prior physical NPU work
 
-The only physical SoC tested so far is **Snapdragon 8 Elite** with Android 17,
+The prior Qualcomm physical SoC tested is **Snapdragon 8 Elite** with Android 17,
 LiteRT 2.2.0 and QNN 2.47.0. This is validation coverage, not a device allowlist.
 No new physical-device testing was performed during repository preparation.
 
@@ -78,6 +78,35 @@ they are different environments and visit budgets. Temperature, background load,
 compiler caches and search position affect throughput. Sustained thermal behavior,
 battery use and playing strength have not been measured.
 
+## MediaTek MT6989 NPU validation
+
+Measured on 2026-10-02 with Android 16, a debug build, LiteRT 2.2.0 and the
+device's public Neuron USDK 8.2.26 runtime. The compiler and dispatch plugins were
+built from matching LiteRT source with the [runtime selection patch](npu.md).
+Unpatched plugins selected the older MGVI 7.3.19 library, which failed APU device
+access and crashed during compilation, even for the convolution probe.
+
+The patched b6 numerical probe, official JNI search/cancellation/reopen suite,
+and b10 numerical plus both-model benchmark/cancellation/switch suite completed.
+Native audits confirmed Neuron graph loading and complete DispatchDelegate
+assignment for every runtime; NPU boundaries used AHWB/DMA-BUF. LiteRT registers
+CPU/GPU accelerators and can construct an idle XNNPACK delegate, but no graph
+nodes were assigned to a CPU delegate in these NPU runs.
+
+The fully audited benchmark run used a 32-visit warm-up and three fresh positions
+of 500 visits each. Initialization below used the on-device compilation cache.
+
+| Model / actual backend | visits/s | Search total | Initialization | Warm-up |
+| --- | ---: | ---: | ---: | ---: |
+| b6c96 / NPU | 276.1 | 5.433 s | 106.1 ms | 166.8 ms |
+| b10c128 / NPU | 225.9 | 6.639 s | 181.4 ms | 160.6 ms |
+
+Sanitized counters: [mediatek-npu.json](benchmarks/mediatek-npu.json).
+A preceding functional run measured 314.6 and 225.2 visits/s respectively, but its
+combined native audit lacked some log records. These short runs show variability;
+they do not establish sustained thermal performance or a CPU-vs-NPU speedup.
+No CPU benchmark or UI test was run on this physical device.
+
 ## 中文说明
 
 引擎页面的 visits/s 来自三个固定局面的真实搜索访问数除以搜索时间，初始化和预热另计。
@@ -86,4 +115,6 @@ battery use and playing strength have not been measured.
 本次模拟器中 b6c96 / CPU 约 121.8 visits/s，b10c128 / CPU 约 44.8 visits/s，均为每局面 100 visits。
 这些数字依赖宿主机，不代表手机 CPU 性能。此前 8 Elite 上完成的一次 b6 NPU 探索测速为
 665.0 visits/s、每局面 500 visits；随后 b10 测试进程被系统结束，因此不能声称完整双模型 NPU
-专项已通过。本轮没有重新使用真机，也尚未进行持续温升、功耗和棋力评测。
+专项已通过。本次 MT6989 的完整 NPU 审计通过，b6c96 / b10c128 在每局面 500 visits 时
+分别为 276.1 / 225.9 visits/s；此前一轮短测为 314.6 / 225.2 visits/s。
+这些结果不能与模拟器数据直接计算加速比，尚未进行持续温升、功耗和棋力评测。

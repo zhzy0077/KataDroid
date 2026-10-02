@@ -64,6 +64,7 @@
     <string name="backend_cpu">CPU</string>
     <string name="backend_npu">NPU</string>
     <string name="npu_unavailable">NPU 运行时不可用，请选择自动或 CPU。</string>
+    <string name="npu_buffer_mismatch">%1$s 未使用 %2$s NPU 硬件缓冲区：%3$s</string>
     <string name="record_subtitle">%1$s · %2$s · 贴 %3$s 目</string>
     <string name="more_options">更多选项</string>
     <string name="pass_move">停一手</string>
@@ -202,13 +203,13 @@
     <string name="local_inference">KataGo · 本机推理</string>
     <string name="katago_cpu_running">正在验证 KataGo CPU…</string>
     <string name="katago_npu_running">\n正在编译并验证 KataGo NPU，首次运行可能较慢…</string>
-    <string name="katago_npu_done">\n三局面精度校验完成。NPU 各输入输出已检查 QNN 缓冲区；完整算子分配以原生日志为准。</string>
+    <string name="katago_npu_done">\n三局面精度校验完成。NPU 各输入输出已检查 NPU 硬件缓冲区；完整算子分配以原生日志为准。</string>
     <string name="katago_cpu_done">\n三个局面的 CPU 输出校验完成。</string>
     <string name="validation_running">验证中…</string>
     <string name="validate_model">验证 KataGo 模型</string>
     <string name="cpu_probe_running">正在验证 CPU…</string>
     <string name="npu_probe_running">\n\n正在验证 NPU…</string>
-    <string name="npu_probe_done">\n\n单层卷积已通过 QNN 缓冲区检查与数值校验。此结果不代表完整 KataGo 网络已可运行。</string>
+    <string name="npu_probe_done">\n\n单层卷积已通过 NPU 硬件缓冲区检查与数值校验。此结果不代表完整 KataGo 网络已可运行。</string>
     <string name="cpu_probe_done">\n\n单层卷积 CPU 输出与参考值一致。</string>
     <string name="conv_diagnostics">基础卷积诊断</string>
     <string name="katago_validation_failed">\n\nKataGo 验证失败：%1$s</string>

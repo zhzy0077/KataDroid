@@ -59,8 +59,10 @@ the TFLite executes the network. The adapter retains all five output heads.
 CPU is always an available selection for supported APK ABIs. There is no SoC or
 phone-model allowlist. If NPU runtime files are packaged, Auto attempts NPU
 initialization, catching initialization/linker failures and opening CPU instead.
-Explicit NPU requests propagate errors. NPU tensor boundaries must be QNN-backed;
-full graph delegation additionally requires the native-log audit.
+Explicit NPU requests propagate errors. Qualcomm tensor boundaries must use
+FastRPC; experimental MediaTek boundaries use AHWB/DMA-BUF and the device's
+public Neuron runtime. Full graph delegation additionally requires the native
+audit. See [runtime setup and the LiteRT selection patch](npu.md).
 
 Analysis files and benchmark results are keyed by model hash and **actual** CPU
 or NPU backend. Auto can display the last completed backend's saved results while

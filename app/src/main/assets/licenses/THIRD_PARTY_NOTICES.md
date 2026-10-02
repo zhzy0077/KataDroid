@@ -48,6 +48,10 @@ are retained in the bundled fixture manifests and the conversion script.
   `tools/prepare_npu.py` remain subject to the licenses delivered with those
   distributions. The script pins their versions and checksums. Downloaded
   vendor libraries are excluded from this Git repository.
+- Optional MediaTek LiteRT compiler/dispatch plugins are built from LiteRT's
+  Apache-2.0 source. The upstream build downloads NeuroPilot SDK headers under
+  the SDK's own license agreement. The SDK and generated plugins are excluded
+  from Git; device-provided Neuron runtime libraries are not copied or bundled.
 
 Consult the dependency distributions and their terms when redistributing a
 build containing vendor runtime binaries. This repository's MIT license applies

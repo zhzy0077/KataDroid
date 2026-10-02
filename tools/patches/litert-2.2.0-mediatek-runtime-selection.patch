@@ -1,0 +1,10 @@
+--- a/litert/vendors/mediatek/neuron_adapter_api.cc
++++ b/litert/vendors/mediatek/neuron_adapter_api.cc
+@@ -139,6 +139,7 @@
+       LITERT_LOG(LITERT_INFO, "Loading MediaTek NeuronAdapter .so from: %s",
+                  so_path.c_str());
+       dlib_ = std::move(maybe_dlib.Value());
++      break;  // Preserve the first usable public runtime; do not overwrite it with MGVI.
+     }
+   }
+ 

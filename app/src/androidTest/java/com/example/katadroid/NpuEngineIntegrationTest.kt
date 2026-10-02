@@ -30,6 +30,7 @@ class NpuEngineIntegrationTest {
         fun report(message: String) = instrumentation.sendStatus(0, Bundle().apply { putString("stream", "\n$message\n") })
         report("KATADROID_PID=${Process.myPid()}")
         EngineIntegrationTest().verifyOfficialPositions(Accelerator.NPU)
+        report("NPU_SESSION_CLOSED reference")
         report("NPU: three official feature/value/score/policy/ownership positions passed")
 
         KataGoSession.open(context, Accelerator.NPU).use { session ->
@@ -54,14 +55,17 @@ class NpuEngineIntegrationTest {
             stop.set(true)
             withTimeout(3000) { assertNull(running.await()) }
         }
-        // A new QNN runtime must work after cancellation and native NN teardown.
+        report("NPU_SESSION_CLOSED search")
+        // A new NPU runtime must work after cancellation and native NN teardown.
         KataGoSession.open(context, Accelerator.NPU).use { session ->
             session.setPosition(AnalysisPosition(emptyList()))
             val result = checkNotNull(session.analyze(32, AtomicBoolean(false)))
             assertTrue(result.visits >= 32)
             assertEquals("NPU", result.backend)
         }
+        report("NPU_SESSION_CLOSED restart")
         report("NPU: cancellation, release and reopening passed")
+        report("PASS NPU official positions, live search, cancellation and restart")
         Log.i("KataDroidEngine", "PASS NPU official positions, live search, cancellation and restart")
     }
 }

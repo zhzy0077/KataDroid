@@ -28,6 +28,7 @@ class NpuModelBenchmarkTest {
         val raw = KataGoProbe.run(context, Accelerator.NPU, KataGoModel.B10)
         report(raw.display())
         EngineIntegrationTest().verifyOfficialPositions(Accelerator.NPU, KataGoModel.B10)
+        report("NPU_SESSION_CLOSED reference")
         for (model in KataGoModel.entries) {
             Log.i("KataDroidEngine", "NPU benchmark opening ${model.id}")
             val before = SystemClock.elapsedRealtimeNanos()
@@ -49,12 +50,15 @@ class NpuModelBenchmarkTest {
                     withTimeout(3000) { assertNull(running.await()) }
                 }
             }
+            report("NPU_SESSION_CLOSED benchmark ${model.id}")
         }
         // Switch back after cancelling the bigger model, including complete teardown.
         KataGoSession.open(context, Accelerator.NPU, KataGoModel.B6).use { session ->
             session.setPosition(AnalysisPosition(emptyList()))
             assertEquals(32, session.analyze(32, AtomicBoolean(false))?.visits)
         }
+        report("NPU_SESSION_CLOSED restart")
+        report("PASS NPU b10 accuracy, both model searches, cancellation and model switch")
         Log.i("KataDroidEngine", "PASS NPU b10 accuracy, both model searches, cancellation and model switch")
     }
 }

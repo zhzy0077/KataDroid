@@ -64,6 +64,7 @@
     <string name="backend_cpu">CPU</string>
     <string name="backend_npu">NPU</string>
     <string name="npu_unavailable">The NPU runtime is unavailable. Choose Auto or CPU.</string>
+    <string name="npu_buffer_mismatch">%1$s does not use %2$s NPU hardware buffers: %3$s</string>
     <string name="record_subtitle">%1$s · %2$s · Komi %3$s</string>
     <string name="more_options">More options</string>
     <string name="pass_move">Pass</string>
@@ -208,7 +209,7 @@
     <string name="validate_model">Validate KataGo model</string>
     <string name="cpu_probe_running">Validating CPU…</string>
     <string name="npu_probe_running">\n\nValidating NPU…</string>
-    <string name="npu_probe_done">\n\nThe single convolution passed QNN buffer and numerical checks. This does not validate the full KataGo network.</string>
+    <string name="npu_probe_done">\n\nThe single convolution passed NPU hardware buffer and numerical checks. This does not validate the full KataGo network.</string>
     <string name="cpu_probe_done">\n\nSingle-convolution CPU output matches the reference.</string>
     <string name="conv_diagnostics">Basic convolution diagnostics</string>
     <string name="katago_validation_failed">\n\nKataGo validation failed: %1$s</string>

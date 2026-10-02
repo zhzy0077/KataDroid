@@ -7,7 +7,6 @@ import com.google.ai.edge.litert.Accelerator
 import com.google.ai.edge.litert.CompiledModel
 import com.google.ai.edge.litert.Environment
 import com.google.ai.edge.litert.TensorBuffer
-import com.google.ai.edge.litert.TensorBufferType
 import com.example.katadroid.engine.KataGoModel
 import java.io.File
 import java.security.MessageDigest
@@ -66,11 +65,7 @@ object KataGoProbe {
         Log.i(TAG, "BEGIN backend=$accelerator model=${fixtures.getString("modelName")}")
         val started = SystemClock.elapsedRealtimeNanos()
         Environment.create(context, envOptions).use { env ->
-            val options = CompiledModel.Options(accelerator).apply {
-                // Avoid per-inference INFO logging in timing samples.
-                if (isNpu) qualcommOptions = CompiledModel.QualcommOptions(
-                    logLevel = CompiledModel.QualcommOptions.LogLevel.WARN)
-            }
+            val options = NpuProbe.options(context, accelerator)
             CompiledModel.create(context.assets, modelSpec.asset, options, env).use { model ->
                 val initMs = (SystemClock.elapsedRealtimeNanos() - started) / 1e6
                 val signature = fixtures.getString("signature")
@@ -82,9 +77,7 @@ object KataGoProbe {
                         val types = if (name in inputNames) model.getInputBufferRequirements(name, signature).supportedTypes
                             else model.getOutputBufferRequirements(name, signature).supportedTypes
                         Log.i(TAG, "NPU boundary=$name types=$types")
-                        check(TensorBufferType.FastRpc in types && TensorBufferType.HostMemory !in types) {
-                            "$name does not use QNN buffers: $types"
-                        }
+                        NpuProbe.verifyBuffers(context, types, name)
                     }
                 }
                 val allocated = mutableListOf<TensorBuffer>()

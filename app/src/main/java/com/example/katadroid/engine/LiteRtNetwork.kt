@@ -8,7 +8,6 @@ import com.google.ai.edge.litert.Accelerator
 import com.google.ai.edge.litert.CompiledModel
 import com.google.ai.edge.litert.Environment
 import com.google.ai.edge.litert.TensorBuffer
-import com.google.ai.edge.litert.TensorBufferType
 import java.io.File
 import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicBoolean
@@ -71,16 +70,14 @@ class LiteRtNetwork private constructor(
             var compiled: CompiledModel? = null
             val allocated = mutableListOf<TensorBuffer>()
             try {
-                val options = CompiledModel.Options(accelerator).apply {
-                    if (npu) qualcommOptions = CompiledModel.QualcommOptions(logLevel = CompiledModel.QualcommOptions.LogLevel.WARN)
-                }
+                val options = NpuProbe.options(context, accelerator)
                 val model = CompiledModel.create(context.assets, modelSpec.asset, options, environment)
                 compiled = model
                 val inputNames = listOf("InputSpatial", "InputGlobal")
                 if (npu) for (name in inputNames + OUTPUTS.keys) {
                     val types = if (name in inputNames) model.getInputBufferRequirements(name, SIGNATURE).supportedTypes
                         else model.getOutputBufferRequirements(name, SIGNATURE).supportedTypes
-                    check(TensorBufferType.FastRpc in types && TensorBufferType.HostMemory !in types) { "$name does not use QNN buffers" }
+                    NpuProbe.verifyBuffers(context, types, name)
                     Log.i(TAG, "NPU boundary=$name types=$types")
                 }
                 val inputs = inputNames.associateWith { model.createInputBuffer(it, SIGNATURE).also(allocated::add) }

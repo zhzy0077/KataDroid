@@ -10,6 +10,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.KataDroid">
+        <uses-native-library android:name="libneuronusdk_adapter.mtk.so" android:required="false" />
+        <uses-native-library android:name="libneuronusdk_adapter.9.mtk.so" android:required="false" />
+        <uses-native-library android:name="libneuron_adapter_mgvi.so" android:required="false" />
+        <uses-native-library android:name="libneuron_sys_util.mtk.so" android:required="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

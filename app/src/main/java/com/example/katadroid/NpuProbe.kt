@@ -33,17 +33,46 @@ object NpuProbe {
     fun deviceDescription(): String =
         "${Build.MANUFACTURER} ${Build.MODEL}\n${Build.SOC_MODEL} · Android ${Build.VERSION.RELEASE}"
 
-    /** A packaged runtime is a candidate, not a promise of hardware support. */
-    fun hasRuntimeLibraries(context: Context): Boolean = requiredLibraries.all {
-        File(context.applicationInfo.nativeLibraryDir, it).isFile
+    enum class Vendor(val compiler: String, val libraries: List<String>) {
+        QUALCOMM("libLiteRtCompilerPlugin_Qualcomm.so", listOf(
+            "libLiteRtCompilerPlugin_Qualcomm.so", "libLiteRtDispatch_Qualcomm.so",
+            "libQnnHtp.so", "libQnnHtpPrepare.so", "libQnnIr.so", "libQnnSaver.so")),
+        MEDIATEK("libLiteRtCompilerPlugin_MediaTek.so", listOf(
+            "libLiteRtCompilerPlugin_MediaTek.so", "libLiteRtDispatch_MediaTek.so")),
     }
 
-    private val requiredLibraries = listOf("libLiteRtCompilerPlugin_Qualcomm.so", "libLiteRtDispatch_Qualcomm.so",
-        "libQnnHtp.so", "libQnnHtpPrepare.so", "libQnnIr.so", "libQnnSaver.so")
+    /** Packaged plugins are candidates; compilation still determines compatibility. */
+    fun vendor(context: Context): Vendor? {
+        val available = Vendor.entries.filter { candidate -> candidate.libraries.all {
+            File(context.applicationInfo.nativeLibraryDir, it).isFile
+        } }
+        val preferred = if (Build.SOC_MANUFACTURER.equals("MediaTek", ignoreCase = true)) Vendor.MEDIATEK else Vendor.QUALCOMM
+        return preferred.takeIf { it in available } ?: available.singleOrNull()
+    }
+
+    fun hasRuntimeLibraries(context: Context): Boolean = vendor(context) != null
 
     fun loadCompiler(context: Context) {
-        check(hasRuntimeLibraries(context)) { context.getString(R.string.npu_unavailable) }
-        System.load(File(context.applicationInfo.nativeLibraryDir, "libLiteRtCompilerPlugin_Qualcomm.so").absolutePath)
+        val selected = checkNotNull(vendor(context)) { context.getString(R.string.npu_unavailable) }
+        System.load(File(context.applicationInfo.nativeLibraryDir, selected.compiler).absolutePath)
+        Log.i("KataDroidEngine", "NPU vendor=$selected")
+    }
+
+    fun options(context: Context, accelerator: Accelerator): CompiledModel.Options =
+        CompiledModel.Options(accelerator).apply {
+            if (accelerator == Accelerator.NPU && vendor(context) == Vendor.QUALCOMM)
+                qualcommOptions = CompiledModel.QualcommOptions(logLevel = CompiledModel.QualcommOptions.LogLevel.WARN)
+        }
+
+    fun verifyBuffers(context: Context, types: List<TensorBufferType>, name: String) {
+        val hardware = when (vendor(context)) {
+            Vendor.QUALCOMM -> TensorBufferType.FastRpc in types
+            Vendor.MEDIATEK -> TensorBufferType.Ahwb in types || TensorBufferType.DmaBuf in types
+            null -> false
+        }
+        check(hardware && TensorBufferType.HostMemory !in types) {
+            context.getString(R.string.npu_buffer_mismatch, name, vendor(context)?.name ?: "unknown", types.toString())
+        }
     }
 
     suspend fun run(context: Context, accelerator: Accelerator): Result = withContext(Dispatchers.Default) {
@@ -57,22 +86,14 @@ object NpuProbe {
         Environment.create(context, envOptions).use { environment ->
             Log.i(TAG, "Requested=$accelerator available=${environment.getAvailableAccelerators()}")
             // No CPU/GPU fallback requested. Confirm graph assignment in native logs too.
-            val options = CompiledModel.Options(accelerator).apply {
-                if (accelerator == Accelerator.NPU) qualcommOptions = CompiledModel.QualcommOptions(
-                    logLevel = CompiledModel.QualcommOptions.LogLevel.INFO)
-            }
+            val options = options(context, accelerator)
             CompiledModel.create(context.assets, "conv_probe.tflite",
                 options, environment).use { model ->
                 val initMs = (SystemClock.elapsedRealtimeNanos() - start) / 1e6
                 val inputTypes = model.getInputBufferRequirements("board").supportedTypes
                 Log.i(TAG, "$accelerator inputBuffers=$inputTypes")
                 if (accelerator == Accelerator.NPU) {
-                    // This probe has exactly one Conv2D. Its boundary must be QNN-backed.
-                    // This is not a general proof of full delegation for multi-op networks.
-                    check(TensorBufferType.FastRpc in inputTypes &&
-                        TensorBufferType.HostMemory !in inputTypes) {
-                        "QNN execution path not confirmed; possible CPU fallback: $inputTypes"
-                    }
+                    verifyBuffers(context, inputTypes, "board")
                 }
                 val buffers = mutableListOf<TensorBuffer>()
                 try {

@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-02",
+  "soc": "MediaTek MT6989",
+  "android": "16",
+  "build": "debug",
+  "litert": "2.2.0",
+  "neuronRuntime": "8.2.26",
+  "runtimeSelectionPatch": "litert-2.2.0-mediatek-runtime-selection.patch",
+  "nativeDelegationAudit": "passed",
+  "results": [
+    {
+      "method": "katago-1.18.2-search-v2",
+      "engine": "6611aa4aa2b6d51273337830ccd80884d8a1d3b46bb0a201e26cc3d798b35d72-NPU",
+      "model": "b6c96",
+      "backend": "NPU",
+      "visitsPerPosition": 500,
+      "initializationNanos": 106066846,
+      "warmupNanos": 166843692,
+      "samples": [
+        {
+          "label": "empty",
+          "visits": 500,
+          "nanos": 1551360385
+        },
+        {
+          "label": "opening",
+          "visits": 500,
+          "nanos": 2032557846
+        },
+        {
+          "label": "capture",
+          "visits": 500,
+          "nanos": 1848875384
+        }
+      ],
+      "visitsPerSecond": 276.10104603614695
+    },
+    {
+      "method": "katago-1.18.2-search-v2",
+      "engine": "a4655e42d204ecb4ce3c181ff51401eabf9f165e21f31191a6096ba512165326-NPU",
+      "model": "b10c128",
+      "backend": "NPU",
+      "visitsPerPosition": 500,
+      "initializationNanos": 181392538,
+      "warmupNanos": 160620307,
+      "samples": [
+        {
+          "label": "empty",
+          "visits": 500,
+          "nanos": 1494617538
+        },
+        {
+          "label": "opening",
+          "visits": 500,
+          "nanos": 2567981462
+        },
+        {
+          "label": "capture",
+          "visits": 500,
+          "nanos": 2576749924
+        }
+      ],
+      "visitsPerSecond": 225.92576729591386
+    }
+  ]
+}
