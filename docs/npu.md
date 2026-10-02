@@ -50,8 +50,19 @@ The optional native-library manifest entries expose the device's public Neuron
 libraries to the app. Plugin availability does not establish model compatibility.
 
 The LiteRT v2.2.0 release archives currently omit the MediaTek plugins. Build
-these from the matching upstream tag in an ignored local checkout, using Bazel
-7.7.0 and the Android SDK/NDK environment variables:
+these from the matching upstream tag in an ignored local checkout. On Linux
+x86_64 with the project's Android SDK/NDK installed, the preparation script
+downloads checksum-pinned LiteRT 2.2.0 and Bazel 7.7.0, applies the patch, builds
+the plugins and copies them to the ignored JNI library directory:
+
+```bash
+export ANDROID_HOME=/path/to/Android/Sdk
+bash tools/prepare_mediatek_npu.sh
+```
+
+The tagged release workflow runs both Qualcomm and MediaTek preparation scripts
+and verifies that their arm64 plugins are in the signed APK. NPU execution still
+depends on vendor drivers and hardware. For a manual source build:
 
 Apply [the runtime selection patch](../tools/patches/litert-2.2.0-mediatek-runtime-selection.patch)
 to that LiteRT checkout first. Upstream v2.2.0 keeps iterating after loading a

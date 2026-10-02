@@ -14,8 +14,8 @@ android {
         applicationId = "com.example.katadroid"
         minSdk = 33
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = providers.gradleProperty("releaseVersionCode").orNull?.toInt() ?: 1
+        versionName = providers.gradleProperty("releaseVersionName").orNull ?: "1.0"
         // CPU support for phones, tablets and Android Studio virtual devices.
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
 

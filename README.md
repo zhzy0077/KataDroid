@@ -6,6 +6,42 @@ An Android Go board with offline KataGo analysis, variations and SGF editing.
 The app runs the official KataGo search and rules engine locally, with LiteRT
 neural inference. No account or analysis server is required.
 
+<p align="center">
+  <img src="docs/images/analysis-en.png" width="31%" alt="Go board with KataGo candidates and clickable win-rate chart" />
+  <img src="docs/images/settings-en.png" width="31%" alt="Settings with a single persistent Apply all changes button" />
+  <img src="docs/images/engine-en.png" width="31%" alt="Model selection and measured search performance" />
+</p>
+
+## Features
+
+- Play either color manually, let KataGo play Black or White, or enable both for self-play.
+- Toggle analysis from the top-right switch; set a search budget from 1 to 50,000 visits.
+- Candidate colors reflect **win-rate loss relative to the best evaluated move**,
+  from the player-to-move perspective: near-best green, then yellow, then red.
+  Three near-equal opening moves can all be green at about 50% win rate.
+- Hold a candidate to preview its variation. Tap the win-rate chart or a tree
+  node to navigate the game; earlier branches and saved analyses remain available.
+- Import/export 19×19 SGF with variations, comments, player metadata and root setup stones.
+- Chinese, Japanese and Korean rules; komi from −400 to 400, including decimals.
+- Physical-pixel touch offset, drag-to-preview placement and a larger landscape board.
+- Switch between bundled b6c96 and b10c128 networks, select Auto / CPU / NPU,
+  and measure actual search **visits/s** on three fixed positions.
+- English and Simplified Chinese interfaces, following Android's app/system language.
+
+## How to use
+
+Build and install the app using the instructions below. Open the three-dot menu
+to **Clear board**, **Import SGF**, **Export SGF** or open **Settings**. Tap an
+intersection to play. The KataGo switch enables analysis; both colors are manual
+by default. In Settings, edit the desired options and tap **Apply all changes**
+once at the bottom. If automatic play is paused, tap **Resume auto** in the
+player status area to continue. Open **Engines & models** to choose a model and
+benchmark it.
+
+Android 13+ supports choosing English or Chinese in system Settings → Apps →
+KataDroid → Language. The app initially opens an illustrative game; its analysis
+and candidate values come from real search.
+
 ## Device and SoC compatibility
 
 KataDroid targets **Android 13 / API 33 or newer**, with `arm64-v8a` and `x86_64`
@@ -72,42 +108,6 @@ CPU fallback does not prove the NPU ran. Contributors can use the
 [dedicated NPU audit](docs/npu.md). Share sanitized results and app-only screenshots;
 omit device serials, account details and local paths.
 
-<p align="center">
-  <img src="docs/images/analysis-en.png" width="31%" alt="Go board with KataGo candidates and clickable win-rate chart" />
-  <img src="docs/images/settings-en.png" width="31%" alt="Settings with a single persistent Apply all changes button" />
-  <img src="docs/images/engine-en.png" width="31%" alt="Model selection and measured search performance" />
-</p>
-
-## Features
-
-- Play either color manually, let KataGo play Black or White, or enable both for self-play.
-- Toggle analysis from the top-right switch; set a search budget from 1 to 50,000 visits.
-- Candidate colors reflect **win-rate loss relative to the best evaluated move**,
-  from the player-to-move perspective: near-best green, then yellow, then red.
-  Three near-equal opening moves can all be green at about 50% win rate.
-- Hold a candidate to preview its variation. Tap the win-rate chart or a tree
-  node to navigate the game; earlier branches and saved analyses remain available.
-- Import/export 19×19 SGF with variations, comments, player metadata and root setup stones.
-- Chinese, Japanese and Korean rules; komi from −400 to 400, including decimals.
-- Physical-pixel touch offset, drag-to-preview placement and a larger landscape board.
-- Switch between bundled b6c96 and b10c128 networks, select Auto / CPU / NPU,
-  and measure actual search **visits/s** on three fixed positions.
-- English and Simplified Chinese interfaces, following Android's app/system language.
-
-## Quick start
-
-Build and install the app using the instructions below. Open the three-dot menu
-to **Clear board**, **Import SGF**, **Export SGF** or open **Settings**. Tap an
-intersection to play. The KataGo switch enables analysis; both colors are manual
-by default. In Settings, edit the desired options and tap **Apply all changes**
-once at the bottom. If automatic play is paused, tap **Resume auto** in the
-player status area to continue. Open **Engines & models** to choose a model and
-benchmark it.
-
-Android 13+ supports choosing English or Chinese in system Settings → Apps →
-KataDroid → Language. The app initially opens an illustrative game; its analysis
-and candidate values come from real search.
-
 ## Build
 
 Use Android Studio with API 37 support, or the Gradle wrapper. Toolchain:
@@ -124,6 +124,9 @@ adb -s <target-serial> install -r app/build/outputs/apk/debug/app-debug.apk
 The included assets make a CPU build possible without Python, model downloads or
 conversion tools. For the optional NPU plugins, see [NPU setup](docs/npu.md).
 Release APKs require your own signing configuration; never commit signing keys.
+Pushing a version tag such as `v1.0.0` builds a signed APK and publishes it as a
+GitHub Release once the repository's signing secrets are configured. See
+[tagged APK release setup](CONTRIBUTING.md#tagged-apk-releases).
 
 ```bash
 python3 tools/check_integrity.py
@@ -132,7 +135,7 @@ python3 tools/check_integrity.py
 
 AVD instrumentation commands are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## How it works
+### How it works
 
 Compose UI → game/SGF state → serialized analysis controller → JNI → official
 KataGo rules, features and search → LiteRT CPU or optional NPU inference.

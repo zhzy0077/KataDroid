@@ -1,0 +1,111 @@
+name: Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate release tag and signing configuration
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?$ ]]; then
+            echo '::error::Use a version tag such as v1.0.0 or v1.0.0-rc.1.'
+            exit 1
+          fi
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::Missing signing configuration: $name. See CONTRIBUTING.md."
+              exit 1
+            fi
+          done
+          echo "RELEASE_VERSION=${RELEASE_TAG#v}" >> "$GITHUB_ENV"
+          echo "RELEASE_VERSION_CODE=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: '16111833'
+          packages: 'platform-tools'
+          log-accepted-android-sdk-licenses: false
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install Android toolchain
+        run: sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0' 'ndk;28.2.13676358' 'cmake;3.22.1'
+      - name: Check bundled source and models
+        run: python3 tools/check_integrity.py
+      - name: Prepare Qualcomm NPU plugins
+        run: python3 tools/prepare_npu.py
+      - name: Build patched MediaTek NPU plugins
+        run: ANDROID_NDK_HOME="$ANDROID_HOME/ndk/28.2.13676358" bash tools/prepare_mediatek_npu.sh
+      - name: Test and build release APK
+        run: |
+          ./gradlew :app:testDebugUnitTest :app:lintRelease :app:assembleRelease \
+            -PreleaseVersionName="$RELEASE_VERSION" \
+            -PreleaseVersionCode="$RELEASE_VERSION_CODE" --console=plain
+      - name: Align, sign and verify APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          keystore="$RUNNER_TEMP/release.jks"
+          trap 'rm -f "$keystore"' EXIT
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$keystore"
+          tools="$ANDROID_HOME/build-tools/36.0.0"
+          mkdir -p dist
+          apk="dist/KataDroid-${RELEASE_VERSION}.apk"
+          "$tools/zipalign" -P 16 -f 4 app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned.apk"
+          "$tools/apksigner" sign --ks "$keystore" --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass env:KEYSTORE_PASSWORD --key-pass env:KEY_PASSWORD \
+            --out "$apk" "$RUNNER_TEMP/aligned.apk"
+          "$tools/apksigner" verify "$apk"
+          "$tools/zipalign" -c -P 16 4 "$apk"
+          python3 tools/check_release_apk.py "$apk"
+          (cd dist && sha256sum "KataDroid-${RELEASE_VERSION}.apk" > SHA256SUMS)
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/release-notes.md" <<'NOTES'
+          Signed universal APK for Android 13+ (arm64-v8a and x86_64).
+
+          This build includes offline CPU inference, the bundled b6c96 and b10c128 models, Qualcomm LiteRT/QNN plugins and experimental patched MediaTek LiteRT/Neuron plugins. NPU execution depends on your SoC and vendor drivers; Auto falls back to CPU if NPU initialization fails. See docs/npu.md and README.md for setup and tested compatibility.
+
+          Compatibility reports are welcome: include phone model, SoC, Android version, model, actual backend and benchmark visits/s. See README.md for measured results and reporting details.
+          NOTES
+          flags=()
+          if [[ "$RELEASE_TAG" == *-* ]]; then
+            flags+=(--prerelease)
+          fi
+          gh release create "$RELEASE_TAG" dist/*.apk dist/SHA256SUMS \
+            --draft --verify-tag --title "KataDroid $RELEASE_TAG" --generate-notes \
+            --notes-file "$RUNNER_TEMP/release-notes.md" "${flags[@]}"
+          gh release edit "$RELEASE_TAG" --draft=false

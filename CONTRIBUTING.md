@@ -61,3 +61,61 @@ Never imply a skipped or incomplete hardware audit passed.
 
 Sign release APKs outside Git. Preserve `LICENSE` and third-party notices when
 distributing source or binaries; optional vendor runtimes have their own terms.
+
+## Tagged APK releases
+
+[Release APK](.github/workflows/release.yml) runs when a tag such as `v1.0.0` or
+`v1.0.0-rc.1` is pushed. It checks integrity, runs unit tests and release lint,
+builds and verifies a signed universal APK, then creates a GitHub Release with
+the APK and `SHA256SUMS`. The release stays a draft until asset uploads succeed.
+Tags with a prerelease suffix create prereleases.
+These APKs contain both bundled models, CPU inference, Qualcomm NPU plugins and
+experimental MediaTek NPU plugins built with the runtime selection patch. The
+workflow checks that both vendors' plugins are present before publishing. Plugin
+packaging does not validate execution on every SoC; physical NPU audits and AVD
+UI tests remain separate checks.
+
+Before the first release, create a release key outside Git (or use your existing
+release key). Keep a secure backup: subsequent APK updates require the same key.
+
+```bash
+mkdir -p .local/signing
+keytool -genkeypair -keystore .local/signing/release.jks -alias katadroid \
+  -keyalg RSA -keysize 4096 -validity 10000
+```
+
+Configure these repository Actions secrets under **Settings → Secrets and
+variables → Actions**:
+
+| Secret | Value |
+| --- | --- |
+| `ANDROID_KEYSTORE_BASE64` | Base64-encoded keystore file |
+| `ANDROID_KEYSTORE_PASSWORD` | Keystore password |
+| `ANDROID_KEY_ALIAS` | Signing alias, e.g. `katadroid` |
+| `ANDROID_KEY_PASSWORD` | Private-key password (often the same as the keystore password) |
+
+For example, upload the keystore secret without printing it:
+
+```bash
+base64 -w 0 .local/signing/release.jks | gh secret set ANDROID_KEYSTORE_BASE64
+```
+
+Set the remaining secrets through GitHub's UI or interactive `gh secret set`.
+The workflow fails before building if any signing secret is missing. Release
+publishing uses the job's `GITHUB_TOKEN` with `contents: write`; no personal token
+is needed. Repository or organization policy must allow this permission.
+
+After committing and pushing the workflow and release changes:
+
+```bash
+git tag -a v1.0.0 -m 'KataDroid 1.0.0'
+git push origin v1.0.0
+```
+
+The APK's version name comes from the tag without `v`; its version code is
+`1000 + github.run_number`. Keep this workflow's identity and counter for future
+releases, and publish tags in version order. Re-running a failed job retains its
+version code. If an upload fails after creating a draft, delete that incomplete
+draft before retrying. A release that already exists is not overwritten; use a
+new tag for changes. These release-signed APKs cannot upgrade a debug-signed installation
+in place; export saved games before changing signing identities.
