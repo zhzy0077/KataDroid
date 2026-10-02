@@ -134,13 +134,25 @@ jobs:
 
           Arm64 and universal builds include offline CPU inference, the bundled b6c96 and b10c128 models, Qualcomm LiteRT/QNN plugins and experimental patched MediaTek LiteRT/Neuron plugins. The x86_64 APK supports CPU inference. NPU execution depends on your SoC and vendor drivers; Auto falls back to CPU if NPU initialization fails. See docs/npu.md and README.md for setup and tested compatibility.
 
+          This build isolates Qualcomm and MediaTek compiler/dispatch libraries so LiteRT loads the selected vendor's NPU runtime. It includes full SGF history analysis followed by continuous selected-position search. For the amended v1.0.0, install this newly built APK over the earlier v1.0.0; its higher Android version code permits an in-place upgrade.
+
           Compatibility reports are welcome: include phone model, SoC, Android version, model, actual backend and benchmark visits/s. See README.md for measured results and reporting details.
           NOTES
           flags=()
           if [[ "$RELEASE_TAG" == *-* ]]; then
             flags+=(--prerelease)
           fi
-          gh release create "$RELEASE_TAG" dist/*.apk dist/SHA256SUMS \
-            --draft --verify-tag --title "KataDroid $RELEASE_TAG" --generate-notes \
-            --notes-file "$RUNNER_TEMP/release-notes.md" "${flags[@]}"
+          if draft=$(gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft'); then
+            if [[ "$draft" != true ]]; then
+              echo '::error::An existing release must be explicitly placed in draft before replacing its APKs.'
+              exit 1
+            fi
+            gh release upload "$RELEASE_TAG" dist/*.apk dist/SHA256SUMS --clobber
+            gh release edit "$RELEASE_TAG" --title "KataDroid $RELEASE_TAG" \
+              --notes-file "$RUNNER_TEMP/release-notes.md" --target "$GITHUB_SHA"
+          else
+            gh release create "$RELEASE_TAG" dist/*.apk dist/SHA256SUMS \
+              --draft --verify-tag --title "KataDroid $RELEASE_TAG" --generate-notes \
+              --notes-file "$RUNNER_TEMP/release-notes.md" "${flags[@]}"
+          fi
           gh release edit "$RELEASE_TAG" --draft=false

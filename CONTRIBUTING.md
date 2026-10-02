@@ -165,3 +165,8 @@ version code. If an upload fails after creating a draft, delete that incomplete
 draft before retrying. A release that already exists is not overwritten; use a
 new tag for changes. These release-signed APKs cannot upgrade a debug-signed installation
 in place; export saved games before changing signing identities.
+
+An explicitly authorized replacement of an existing tag release must first put
+that GitHub release in draft. The official tag workflow can replace assets only
+on a draft release; it refuses to overwrite a published release. After verifying
+all APKs, it publishes the draft with the new assets and checksums.

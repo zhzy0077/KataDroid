@@ -65,16 +65,17 @@ APK, the device's vendor drivers and the selected network.
 
 | Device / SoC or environment | Backend | Current test coverage |
 | --- | --- | --- |
-| Qualcomm Snapdragon 8 Elite device | LiteRT / QNN NPU | Both models passed numerical, search, cancellation/restart and native delegation checks in the 1.0.1 release candidate. **Published v1.0.0 has a combined-plugin selection bug on Qualcomm; see below.** |
+| Qualcomm Snapdragon 8 Elite device | LiteRT / QNN NPU | Both models passed numerical, search, cancellation/restart and native delegation checks in the 1.0.1 release candidate. The original v1.0.0 had a combined-plugin selection bug; the amended release uses the fix below. |
 | MediaTek Dimensity 9300 (MT6989) device | LiteRT / Neuron NPU, experimental | b6c96 and b10c128 numerical, search/lifecycle and benchmark checks passed with native delegation evidence, using patched plugins. |
 | Android Studio x86_64 AVD, API 37 | CPU | UI and CPU regression baseline; performance depends on the host computer. |
 | Other phones / SoCs | CPU; NPU where a compatible runtime is available | Compatibility feedback welcome. The results above do not establish support for other SoC generations or every phone with the same SoC. |
 
-**v1.0.0 Qualcomm issue:** when both vendors’ dispatch plugins are packaged,
+**Original v1.0.0 Qualcomm issue:** when both vendors’ dispatch plugins are packaged,
 LiteRT can load the MediaTek plugin on a Snapdragon device and fail with
 `HostMemory`. The source fix isolates the selected vendor’s compiler and dispatch
 libraries. It passed NPU audits on Snapdragon 8 Elite and Dimensity 9300 using a
-release-signed 1.0.1 candidate; that candidate is not yet a published release.
+release-signed 1.0.1 candidate. The amended v1.0.0 is being rebuilt through the
+official release workflow with this fix and a higher Android version code.
 
 A clean checkout builds a **CPU-capable APK**. NPU plugins are optional:
 see [NPU setup](docs/npu.md) for Qualcomm setup and the experimental MediaTek
@@ -88,7 +89,7 @@ Check the actual backend shown in the app when reporting a result.
 These are real KataGo search **visits per second**, including search and inference
 work. Initialization and warm-up are excluded. Each run measures three fresh
 positions after a 32-visit warm-up. The production rows are medians of three
-trials on the published **v1.0.0** APK; the other rows are debug measurements.
+trials on the original published **v1.0.0** APK (version code 1002); the other rows are debug measurements.
 
 | Environment / actual backend | Visits per position | b6c96 visits/s | b10c128 visits/s |
 | --- | ---: | ---: | ---: |

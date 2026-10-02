@@ -34,7 +34,8 @@ original extracted library path; links are repaired after an APK update. Package
 native files stay intact. NPU buffers and native delegation still require validation.
 The release-signed 1.0.1 candidate passed the numerical, both-model search,
 cancellation/restart and timed-search suites on Snapdragon 8 Elite and Dimensity
-9300. These checks do not change the published v1.0.0 APK. Sanitized evidence is in
+9300. The maintainer requested an amended v1.0.0 built by the official release workflow.
+The candidate checks precede that rebuild. Sanitized evidence is in
 [vendor-isolation-validation.json](benchmarks/vendor-isolation-validation.json).
 
 ## Audit on an explicitly selected device

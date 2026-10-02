@@ -42,7 +42,7 @@ This screenshot shows a separate AVD run using Auto, which selected CPU. Its
 125.4 visits/s result illustrates the report; the recorded baseline below comes
 from a different run.
 
-## Production v1.0.0: Dimensity 9300
+## Original production v1.0.0 (version code 1002): Dimensity 9300
 
 Measured on 2026-10-02 using the APK downloaded from the published v1.0.0 release,
 Android 16 and **MediaTek Dimensity 9300 (MT6989)**. Version code 1002, non-debuggable;
@@ -117,7 +117,7 @@ battery use and playing strength have not been measured.
 
 ## Combined-plugin release audit and fix
 
-The published v1.0.0 arm64 APK was verified by digest on Snapdragon 8 Elite.
+The original published v1.0.0 arm64 APK was verified by digest on Snapdragon 8 Elite.
 Its NPU search failed: LiteRT selected the MediaTek dispatch library despite
 Qualcomm compiler selection, then failed Neuron initialization and produced
 `HostMemory` boundary buffers. CPU results cannot validate this NPU path.
@@ -137,7 +137,10 @@ they do not substitute for AVD UI regression tests. The UI supplies this same
 record history and enables continuous analysis in manual review mode. During
 history completion, the selected position can remain at its initial visit budget.
 
-The candidate is installed on the test devices but has not been published.
+The candidate is installed on the test devices. At the maintainer’s request,
+v1.0.0 is being amended through the official release workflow with this fix.
+The original production timings above identify the original APK by version code
+and digest; they are not measurements of the amended APK.
 Sanitized build identity and validation:
 [vendor-isolation-validation.json](benchmarks/vendor-isolation-validation.json).
 
