@@ -1,5 +1,7 @@
 # KataDroid
 
+[网站源码与发布说明](site/README.md)
+
 [English](README.md) · [使用说明](docs/usage.zh-CN.md) · [技术架构](docs/katago-integration.md) · [模型与性能](docs/models-and-benchmarks.md)
 
 在 Android 上离线运行 KataGo，支持对弈、局面分析、变化树和 SGF 棋谱编辑。

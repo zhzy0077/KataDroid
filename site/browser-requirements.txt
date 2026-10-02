@@ -1,0 +1,2 @@
+# Development / CI only; the published site has no runtime dependencies.
+playwright==1.63.0

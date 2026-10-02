@@ -1,5 +1,7 @@
 # KataDroid
 
+[Website source & publishing](site/README.md)
+
 [简体中文](README.zh-CN.md) · [User guide](docs/android-ui.md) · [Architecture](docs/katago-integration.md) · [Performance](docs/models-and-benchmarks.md)
 
 An Android Go board with offline KataGo analysis, variations and SGF editing.
