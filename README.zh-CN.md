@@ -29,6 +29,10 @@
 
 ## 开始使用
 
+从 [GitHub Releases](https://github.com/zhzy0077/KataDroid/releases) 下载。
+手机和平板推荐 **arm64-v8a**，x86 设备或模拟器选择 **x86_64**；通用 APK 包含两种架构。
+不支持 ARMv7。
+
 安装后通过右上角三点菜单清空棋盘、导入或导出 SGF、进入设置。
 点击棋盘落子，双方默认手动。打开右上角 KataGo 开关开始分析。
 设置中的所有修改由底部「应用全部设置」统一保存；引擎页面可直接切换模型和测速。
@@ -46,7 +50,7 @@ CPU 推理不依赖手机品牌。自动模式尝试安装包中的 NPU 运行�
 联发科插件需要从带补丁的 LiteRT 源码构建，见 [NPU setup](docs/npu.md)。尚未接入 Samsung NPU。
 
 日常界面、功能和 CPU 测试使用 Android Studio 模拟器；真机 NPU 验证覆盖了
-**Snapdragon 8 Elite 和 MediaTek MT6989**。这是测试覆盖范围，不是 App 使用限制。
+**Snapdragon 8 Elite 和 MediaTek Dimensity 9300 (MT6989)**。这是测试覆盖范围，不是 App 使用限制。
 性能数据、统计口径和未完成的验证见[模型与性能说明](docs/models-and-benchmarks.md)。
 
 ## 构建

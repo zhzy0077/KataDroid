@@ -67,13 +67,20 @@ distributing source or binaries; optional vendor runtimes have their own terms.
 
 [Release APK](.github/workflows/release.yml) runs when a tag such as `v1.0.0` or
 `v1.0.0-rc.1` is pushed. It checks integrity, runs unit tests and release lint,
-builds and verifies a signed universal APK, then creates a GitHub Release with
-the APK and `SHA256SUMS`. The release stays a draft until asset uploads succeed.
+builds once, then aligns, signs and verifies standalone arm64-v8a and x86_64
+APKs plus a universal APK. It creates a GitHub Release with all three APKs and
+`SHA256SUMS`. Shared code, resources, models and retained native libraries are
+identical across variants. ARMv7 is not supported. The release stays a draft
+until asset uploads succeed.
 Tags with a prerelease suffix create prereleases.
-These APKs contain both bundled models, CPU inference, Qualcomm NPU plugins and
-experimental MediaTek NPU plugins built with the runtime selection patch. The
-workflow checks that both vendors' plugins are present before publishing. Plugin
-packaging does not validate execution on every SoC; physical NPU audits and AVD
+For an existing universal release, run [Add ABI release APKs](.github/workflows/package-release.yml)
+with its tag. This downloads and checks the original APK, derives and signs the
+ABI variants with the same certificate, and adds them plus updated checksums.
+The original universal APK and published tag stay unchanged.
+All APKs contain both bundled models and CPU inference. Arm64 and universal
+APKs also contain Qualcomm NPU plugins and experimental MediaTek NPU plugins
+built with the runtime selection patch. The workflow checks ABI contents and
+both vendors' arm64 plugins before publishing. Plugin packaging does not validate execution on every SoC; physical NPU audits and AVD
 UI tests remain separate checks.
 
 MediaTek's hermetic host compiler dependencies need substantial disk space. The

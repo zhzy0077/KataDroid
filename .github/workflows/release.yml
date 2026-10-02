@@ -69,7 +69,9 @@ jobs:
       - name: Install Android toolchain
         run: sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0' 'ndk;28.2.13676358' 'cmake;3.22.1'
       - name: Check bundled source and models
-        run: python3 tools/check_integrity.py
+        run: |
+          python3 tools/check_integrity.py
+          python3 -m unittest discover -s tools/tests
       - name: Prepare Qualcomm NPU plugins
         run: python3 tools/prepare_npu.py
       - name: Build patched MediaTek NPU plugins
@@ -98,15 +100,28 @@ jobs:
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$keystore"
           tools="$ANDROID_HOME/build-tools/36.0.0"
           mkdir -p dist
-          apk="dist/KataDroid-${RELEASE_VERSION}.apk"
-          "$tools/zipalign" -P 16 -f 4 app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned.apk"
-          "$tools/apksigner" sign --ks "$keystore" --ks-key-alias "$KEY_ALIAS" \
-            --ks-pass env:KEYSTORE_PASSWORD --key-pass env:KEY_PASSWORD \
-            --out "$apk" "$RUNNER_TEMP/aligned.apk"
-          "$tools/apksigner" verify "$apk"
-          "$tools/zipalign" -c -P 16 4 "$apk"
-          python3 tools/check_release_apk.py "$apk"
-          (cd dist && sha256sum "KataDroid-${RELEASE_VERSION}.apk" > SHA256SUMS)
+          source_apk="app/build/outputs/apk/release/app-release-unsigned.apk"
+          variants="$RUNNER_TEMP/apk-variants"
+          python3 tools/split_release_apk.py "$source_apk" "$variants"
+          for abi in universal arm64-v8a x86_64; do
+            if [[ "$abi" == universal ]]; then
+              input="$source_apk"
+              apk="dist/KataDroid-${RELEASE_VERSION}.apk"
+              abis=(arm64-v8a x86_64)
+            else
+              input="$variants/$abi-unsigned.apk"
+              apk="dist/KataDroid-${RELEASE_VERSION}-$abi.apk"
+              abis=("$abi")
+            fi
+            "$tools/zipalign" -P 16 -f 4 "$input" "$RUNNER_TEMP/aligned-$abi.apk"
+            "$tools/apksigner" sign --ks "$keystore" --ks-key-alias "$KEY_ALIAS" \
+              --ks-pass env:KEYSTORE_PASSWORD --key-pass env:KEY_PASSWORD \
+              --out "$apk" "$RUNNER_TEMP/aligned-$abi.apk"
+            "$tools/apksigner" verify "$apk"
+            "$tools/zipalign" -c -P 16 4 "$apk"
+            python3 tools/check_release_apk.py "$apk" --abis "${abis[@]}"
+          done
+          (cd dist && sha256sum ./*.apk > SHA256SUMS)
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -115,9 +130,9 @@ jobs:
         run: |
           set -euo pipefail
           cat > "$RUNNER_TEMP/release-notes.md" <<'NOTES'
-          Signed universal APK for Android 13+ (arm64-v8a and x86_64).
+          Signed APKs for Android 13+: choose arm64-v8a for phones, x86_64 for emulators, or the universal APK containing both. ARMv7 is not supported.
 
-          This build includes offline CPU inference, the bundled b6c96 and b10c128 models, Qualcomm LiteRT/QNN plugins and experimental patched MediaTek LiteRT/Neuron plugins. NPU execution depends on your SoC and vendor drivers; Auto falls back to CPU if NPU initialization fails. See docs/npu.md and README.md for setup and tested compatibility.
+          Arm64 and universal builds include offline CPU inference, the bundled b6c96 and b10c128 models, Qualcomm LiteRT/QNN plugins and experimental patched MediaTek LiteRT/Neuron plugins. The x86_64 APK supports CPU inference. NPU execution depends on your SoC and vendor drivers; Auto falls back to CPU if NPU initialization fails. See docs/npu.md and README.md for setup and tested compatibility.
 
           Compatibility reports are welcome: include phone model, SoC, Android version, model, actual backend and benchmark visits/s. See README.md for measured results and reporting details.
           NOTES

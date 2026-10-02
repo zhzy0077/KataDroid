@@ -22,6 +22,8 @@ jobs:
       - name: Install Android toolchain
         run: sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0' 'ndk;28.2.13676358' 'cmake;3.22.1'
       - name: Check bundled source and models
-        run: python3 tools/check_integrity.py
+        run: |
+          python3 tools/check_integrity.py
+          python3 -m unittest discover -s tools/tests
       - name: Build and check CPU-capable APK
         run: ./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest --console=plain

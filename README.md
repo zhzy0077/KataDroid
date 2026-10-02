@@ -36,6 +36,10 @@ neural inference. No account or analysis server is required.
 
 ## How to use
 
+Download from [GitHub Releases](https://github.com/zhzy0077/KataDroid/releases).
+Choose **arm64-v8a** for phones and tablets, **x86_64** for x86 devices/emulators,
+or the universal APK for both architectures. ARMv7 is not supported.
+
 Build and install the app using the instructions below. Open the three-dot menu
 to **Clear board**, **Import SGF**, **Export SGF** or open **Settings**. Tap an
 intersection to play. The KataGo switch enables analysis; both colors are manual
@@ -58,7 +62,7 @@ APK, the device's vendor drivers and the selected network.
 | Device / SoC or environment | Backend | Current test coverage |
 | --- | --- | --- |
 | Qualcomm Snapdragon 8 Elite device | LiteRT / QNN NPU | b6c96 numerical, search and native delegation checks passed. The combined both-model benchmark/lifecycle audit did not complete; b10c128 performance remains unverified. |
-| MediaTek MT6989 device | LiteRT / Neuron NPU, experimental | b6c96 and b10c128 numerical, search/lifecycle and benchmark checks passed with native delegation evidence, using patched plugins. |
+| MediaTek Dimensity 9300 (MT6989) device | LiteRT / Neuron NPU, experimental | b6c96 and b10c128 numerical, search/lifecycle and benchmark checks passed with native delegation evidence, using patched plugins. |
 | Android Studio x86_64 AVD, API 37 | CPU | UI and CPU regression baseline; performance depends on the host computer. |
 | Other phones / SoCs | CPU; NPU where a compatible runtime is available | Compatibility feedback welcome. The results above do not establish support for other SoC generations or every phone with the same SoC. |
 
@@ -78,7 +82,7 @@ positions after a 32-visit warm-up; all results below use debug builds.
 | Environment / actual backend | Visits per position | b6c96 visits/s | b10c128 visits/s |
 | --- | ---: | ---: | ---: |
 | Snapdragon 8 Elite / NPU, Android 17 | 500 | 665.0 (exploratory) | Unverified |
-| MediaTek MT6989 / NPU, Android 16 | 500 | 276.1 | 225.9 |
+| MediaTek Dimensity 9300 (MT6989) / NPU, Android 16 | 500 | 276.1 | 225.9 |
 | Android Studio API 37 AVD / CPU | 100 | 121.8 | 44.8 |
 
 The Snapdragon b6 result is from a completed individual measurement; the combined
@@ -130,8 +134,8 @@ adb -s <target-serial> install -r app/build/outputs/apk/debug/app-debug.apk
 The included assets make a CPU build possible without Python, model downloads or
 conversion tools. For the optional NPU plugins, see [NPU setup](docs/npu.md).
 Release APKs require your own signing configuration; never commit signing keys.
-Pushing a version tag such as `v1.0.0` builds a signed APK and publishes it as a
-GitHub Release once the repository's signing secrets are configured. See
+Pushing a version tag such as `v1.0.0` builds signed arm64-v8a, x86_64 and
+universal APKs and publishes them as a GitHub Release once the repository's signing secrets are configured. See
 [tagged APK release setup](CONTRIBUTING.md#tagged-apk-releases).
 
 ```bash
