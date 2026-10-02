@@ -2,8 +2,9 @@
 
 Use the toolchain in [README.md](README.md). A clean checkout builds a CPU-capable
 APK from the included models and source; local conversion environments and NPU
-plugins are optional. The production application ID stays `com.example.katadroid`
-to preserve installed games and settings across upgrades.
+plugins are optional. The application ID is `io.github.zhzy0077.katadroid`. Android treats it as a
+separate app from earlier `com.example.katadroid` builds. Export existing games
+as SGF in the old app and import them into the new app.
 
 ## Checks
 
@@ -26,7 +27,7 @@ adb devices -l
 adb -s <avd-serial> install -r app/build/outputs/apk/debug/app-debug.apk
 adb -s <avd-serial> install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 adb -s <avd-serial> shell am instrument -w -r \
-  com.example.katadroid.test/androidx.test.runner.AndroidJUnitRunner
+  io.github.zhzy0077.katadroid.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
 Tests cover official numerical references, rules/legality, SGF round trips,
@@ -35,7 +36,7 @@ Chinese UI flows, touch offsets, landscape layout and chart navigation. Locale
 rules change only this app's language and restore it after each test. NPU tests
 skip on CPU-only environments; a skip is not a successful NPU validation.
 
-For a single class, insert `-e class com.example.katadroid.EnglishUiTest` before
+For a single class, insert `-e class io.github.zhzy0077.katadroid.EnglishUiTest` before
 the instrumentation runner component. Raw output belongs in `.local/`, not Git.
 
 ## Physical NPU tests
@@ -74,6 +75,11 @@ experimental MediaTek NPU plugins built with the runtime selection patch. The
 workflow checks that both vendors' plugins are present before publishing. Plugin
 packaging does not validate execution on every SoC; physical NPU audits and AVD
 UI tests remain separate checks.
+
+MediaTek's hermetic host compiler dependencies need substantial disk space. The
+release job removes unused preinstalled toolchains and emulator images on its
+disposable runner, checks for 25 GiB free space, and deletes its dedicated Bazel
+output directory after copying the plugins, before the Gradle build.
 
 Before the first release, create a release key outside Git (or use your existing
 release key). Keep a secure backup: subsequent APK updates require the same key.

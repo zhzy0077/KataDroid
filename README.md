@@ -15,13 +15,19 @@ neural inference. No account or analysis server is required.
 ## Features
 
 - Play either color manually, let KataGo play Black or White, or enable both for self-play.
-- Toggle analysis from the top-right switch; set a search budget from 1 to 50,000 visits.
+- Toggle analysis from the top-right switch; set an initial/history/automatic-play budget from 1 to 50,000 visits.
 - Candidate colors reflect **win-rate loss relative to the best evaluated move**,
   from the player-to-move perspective: near-best green, then yellow, then red.
   Three near-equal opening moves can all be green at about 50% win rate.
 - Hold a candidate to preview its variation. Tap the win-rate chart or a tree
   node to navigate the game; earlier branches and saved analyses remain available.
+- Opening a game analyzes the current position first, then fills the whole SGF's
+  history and variations to build a win-rate curve from the opening onward.
+  Once history is complete, the selected position keeps searching until KataGo is paused.
+  Live search snapshots refresh about every 250 ms.
+- Candidate markers are hidden whenever either player is automatic; win rates remain available.
 - Import/export 19×19 SGF with variations, comments, player metadata and root setup stones.
+  Player panels display SGF names and ranks (kyu, dan or professional).
 - Chinese, Japanese and Korean rules; komi from −400 to 400, including decimals.
 - Physical-pixel touch offset, drag-to-preview placement and a larger landscape board.
 - Switch between bundled b6c96 and b10c128 networks, select Auto / CPU / NPU,
@@ -39,8 +45,8 @@ player status area to continue. Open **Engines & models** to choose a model and
 benchmark it.
 
 Android 13+ supports choosing English or Chinese in system Settings → Apps →
-KataDroid → Language. The app initially opens an illustrative game; its analysis
-and candidate values come from real search.
+KataDroid → Language. The app initially opens the first 50 moves of AlphaGo–Lee Sedol, game 4
+(2016-03-13); analysis and candidate values come from real search.
 
 ## Device and SoC compatibility
 

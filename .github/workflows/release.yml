@@ -20,6 +20,21 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      - name: Free disk for native plugin build
+        run: |
+          set -euo pipefail
+          sdk_root="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          # This disposable release runner does not need other language stacks,
+          # preinstalled NDK versions or emulator images.
+          sudo rm -rf /usr/share/dotnet /usr/local/.ghcup /opt/ghc \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/boost /usr/share/swift \
+            "$sdk_root/ndk" "$sdk_root/system-images"
+          df -h .
+          available_kb=$(df -Pk . | awk 'NR == 2 { print $4 }')
+          if (( available_kb < 25 * 1024 * 1024 )); then
+            echo '::error::The native release build needs at least 25 GiB free disk.'
+            exit 1
+          fi
       - name: Validate release tag and signing configuration
         env:
           RELEASE_TAG: ${{ github.ref_name }}
@@ -58,7 +73,12 @@ jobs:
       - name: Prepare Qualcomm NPU plugins
         run: python3 tools/prepare_npu.py
       - name: Build patched MediaTek NPU plugins
-        run: ANDROID_NDK_HOME="$ANDROID_HOME/ndk/28.2.13676358" bash tools/prepare_mediatek_npu.sh
+        run: |
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/28.2.13676358"
+          export NPU_BAZEL_OUTPUT_ROOT="$RUNNER_TEMP/mediatek-bazel"
+          bash tools/prepare_mediatek_npu.sh
+          .local/mediatek-npu-build/bazel --output_user_root="$NPU_BAZEL_OUTPUT_ROOT" shutdown
+          rm -rf "$NPU_BAZEL_OUTPUT_ROOT"
       - name: Test and build release APK
         run: |
           ./gradlew :app:testDebugUnitTest :app:lintRelease :app:assembleRelease \

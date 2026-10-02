@@ -19,7 +19,7 @@ def main():
         if sha256(upstream / name) != expected:
             raise SystemExit(f"Upstream file mismatch: {name}")
     assets = ROOT / "app/src/main/assets/katago"
-    catalog = (ROOT / "app/src/main/java/com/example/katadroid/engine/EngineConfig.kt").read_text()
+    catalog = (ROOT / "app/src/main/java/io/github/zhzy0077/katadroid/engine/EngineConfig.kt").read_text()
     for model, fixture in (("b6c96", "fixtures.json"), ("b10c128", "b10c128-fixtures.json")):
         data = json.loads((assets / fixture).read_text())
         for suffix, key in (("tflite", "tfliteSha256"), ("bin", "descriptorSha256")):

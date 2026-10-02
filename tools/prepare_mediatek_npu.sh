@@ -51,8 +51,11 @@ export ANDROID_HOME="$sdk_view"
 
 # Bazel's Java downloader also needs JVM proxy settings when a local proxy is set.
 proxy_args=()
+if [[ -n "${NPU_BAZEL_OUTPUT_ROOT:-}" ]]; then
+  proxy_args+=("--output_user_root=$NPU_BAZEL_OUTPUT_ROOT")
+fi
 if [[ -n "${HTTPS_PROXY:-${https_proxy:-}}" ]]; then
-  mapfile -t proxy_args < <(python3 - <<'PY'
+  mapfile -t downloaded_proxy_args < <(python3 - <<'PY'
 import os
 from urllib.parse import urlparse
 proxy = urlparse(os.environ.get('HTTPS_PROXY') or os.environ['https_proxy'])
@@ -61,6 +64,7 @@ for scheme in ('http', 'https'):
     print(f'--host_jvm_args=-D{scheme}.proxyPort={proxy.port or 80}')
 PY
   )
+  proxy_args+=("${downloaded_proxy_args[@]}")
 fi
 cd "$source_dir"
 "$work/bazel" "${proxy_args[@]}" build --config=android_arm64 -c opt \
