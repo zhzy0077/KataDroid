@@ -2,8 +2,9 @@
 
 Use the toolchain in [README.md](README.md). A clean checkout builds a CPU-capable
 APK from the included models and source; local conversion environments and NPU
-plugins are optional. The production application ID stays `com.example.katadroid`
-to preserve installed games and settings across upgrades.
+plugins are optional. The application ID is `io.github.zhzy0077.katadroid`. Android treats it as a
+separate app from earlier `com.example.katadroid` builds. Export existing games
+as SGF in the old app and import them into the new app.
 
 ## Checks
 
@@ -26,7 +27,7 @@ adb devices -l
 adb -s <avd-serial> install -r app/build/outputs/apk/debug/app-debug.apk
 adb -s <avd-serial> install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 adb -s <avd-serial> shell am instrument -w -r \
-  com.example.katadroid.test/androidx.test.runner.AndroidJUnitRunner
+  io.github.zhzy0077.katadroid.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
 Tests cover official numerical references, rules/legality, SGF round trips,
@@ -35,7 +36,7 @@ Chinese UI flows, touch offsets, landscape layout and chart navigation. Locale
 rules change only this app's language and restore it after each test. NPU tests
 skip on CPU-only environments; a skip is not a successful NPU validation.
 
-For a single class, insert `-e class com.example.katadroid.EnglishUiTest` before
+For a single class, insert `-e class io.github.zhzy0077.katadroid.EnglishUiTest` before
 the instrumentation runner component. Raw output belongs in `.local/`, not Git.
 
 ## Physical NPU tests
@@ -62,18 +63,63 @@ Never imply a skipped or incomplete hardware audit passed.
 Sign release APKs outside Git. Preserve `LICENSE` and third-party notices when
 distributing source or binaries; optional vendor runtimes have their own terms.
 
+## Scheduled production performance tests
+
+`ProductionBenchmarkTest` requires an installed, non-debuggable release APK and
+an instrumentation APK signed with the same release key. Its native libraries
+come from the production app. Debug-app runs skip this test.
+
+For explicitly scheduled physical CPU/NPU performance work, select the connected
+serial first. The test keeps the app in the foreground, temporarily pauses its
+ordinary analysis, and restores that preference afterward. A temporary activity
+flag keeps the screen awake; system display settings stay unchanged. It measures three
+fresh positions at 500 visits each, with a 32-visit warm-up per trial, and saves
+the median result in the app. Run each model/backend in a separate invocation:
+
+```bash
+adb devices -l
+adb -s <test-serial> shell am instrument -w -r \
+  -e class io.github.zhzy0077.katadroid.ProductionBenchmarkTest \
+  -e backend CPU -e model b10c128 -e rounds 3 -e controllerPath true \
+  io.github.zhzy0077.katadroid.test/androidx.test.runner.AndroidJUnitRunner \
+  > .local/production-CPU-b10.log
+```
+
+For scheduled release NPU integration, use the same class with
+`-e backend NPU -e model b6c96 -e verifySuite true` for numerical/lifecycle checks,
+or `-e verifyHistory true` for all 51 sample positions at 500 visits followed by
+continuous selected-position search beyond 500. Audit the native logs as well.
+
+Repeat with `CPU` / `NPU` and `b6c96` / `b10c128`. Require completed trials and
+passing instrumentation; for NPU, also audit native delegation and vendor graph
+loading as in the dedicated NPU checks above. Keep raw reports out of Git and
+publish only sanitized counters, timings and build identity. Routine CPU and UI
+regression tests still use Android Studio AVDs.
+
 ## Tagged APK releases
 
 [Release APK](.github/workflows/release.yml) runs when a tag such as `v1.0.0` or
 `v1.0.0-rc.1` is pushed. It checks integrity, runs unit tests and release lint,
-builds and verifies a signed universal APK, then creates a GitHub Release with
-the APK and `SHA256SUMS`. The release stays a draft until asset uploads succeed.
+builds once, then aligns, signs and verifies standalone arm64-v8a and x86_64
+APKs plus a universal APK. It creates a GitHub Release with all three APKs and
+`SHA256SUMS`. Shared code, resources, models and retained native libraries are
+identical across variants. ARMv7 is not supported. The release stays a draft
+until asset uploads succeed.
 Tags with a prerelease suffix create prereleases.
-These APKs contain both bundled models, CPU inference, Qualcomm NPU plugins and
-experimental MediaTek NPU plugins built with the runtime selection patch. The
-workflow checks that both vendors' plugins are present before publishing. Plugin
-packaging does not validate execution on every SoC; physical NPU audits and AVD
-UI tests remain separate checks.
+For an existing universal release, run [Add ABI release APKs](.github/workflows/package-release.yml)
+with its tag. This downloads and checks the original APK, derives and signs the
+ABI variants with the same certificate, and adds them plus updated checksums.
+The original universal APK and published tag stay unchanged.
+All APKs contain both bundled models and CPU inference. Arm64 and universal
+APKs also contain Qualcomm NPU plugins and experimental MediaTek NPU plugins
+built with the runtime selection patch. The workflow checks ABI contents and
+both vendors' arm64 plugins before publishing. Plugin packaging does not validate
+execution on every SoC; physical NPU audits and AVD UI tests remain separate checks.
+
+MediaTek's hermetic host compiler dependencies need substantial disk space. The
+release job removes unused preinstalled toolchains and emulator images on its
+disposable runner, checks for 25 GiB free space, and deletes its dedicated Bazel
+output directory after copying the plugins, before the Gradle build.
 
 Before the first release, create a release key outside Git (or use your existing
 release key). Keep a secure backup: subsequent APK updates require the same key.
@@ -119,3 +165,8 @@ version code. If an upload fails after creating a draft, delete that incomplete
 draft before retrying. A release that already exists is not overwritten; use a
 new tag for changes. These release-signed APKs cannot upgrade a debug-signed installation
 in place; export saved games before changing signing identities.
+
+An explicitly authorized replacement of an existing tag release must first put
+that GitHub release in draft. The official tag workflow can replace assets only
+on a draft release; it refuses to overwrite a published release. After verifying
+all APKs, it publishes the draft with the new assets and checksums.

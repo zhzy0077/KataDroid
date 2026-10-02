@@ -78,7 +78,7 @@ function setLanguage(next, remember = true) {
     : 'KataDroid analyzing AlphaGo vs Lee Sedol, Game 4, at move 50';
   for (const image of document.querySelectorAll('[data-screen]')) {
     const screen = image.dataset.screen;
-    const imageLanguage = screen === 'variations' || screen === 'engine' ? 'en' : language;
+    const imageLanguage = screen === 'variations' ? 'en' : language;
     image.src = `assets/${screen}-${imageLanguage}.png`;
     image.alt = image.dataset[language === 'zh' ? 'altZh' : 'altEn'];
     if (language === 'zh' && imageLanguage === 'en') image.alt += '（英文界面）';

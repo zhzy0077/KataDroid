@@ -32,13 +32,16 @@ flowchart TD
 | `app/src/main/cpp/katago_jni.cpp` | Official rules/features/search adapter and LiteRT NN backend |
 | `third_party/katago/` | Unmodified upstream subset with SHA-256 inventory |
 
-The Kotlin paths are relative to `app/src/main/java/com/example/katadroid/`.
+The Kotlin paths are relative to `app/src/main/java/io/github/zhzy0077/katadroid/`.
 
 ## Search and lifetime
 
 Search uses one search worker, one neural server worker and batch size one.
-Progress is published at 32, 128, then 500-visit intervals up to the selected
-limit; 500 is a configurable default. JNI joins the neural thread before LiteRT
+Live search snapshots use a 250 ms time budget, retaining the search tree between
+updates. Initial searches and automatic moves also stop at the configured visit
+budget; 500 is the default. Historical positions use that visit budget. After
+history completes, timed search continues at the selected position until paused.
+A slow inference can delay a snapshot beyond its time budget. JNI joins the neural thread before LiteRT
 tensors, the compiled model and environment are freed.
 
 Every UI request has an epoch and cancellation token. Leaving the board,
@@ -68,6 +71,15 @@ Analysis files and benchmark results are keyed by model hash and **actual** CPU
 or NPU backend. Auto can display the last completed backend's saved results while
 idle; when opening a runtime it reloads the matching cache before publishing new
 analysis. A CPU fallback cannot be saved as an NPU result.
+
+The same serialized worker analyzes the selected position first, then completes
+the open record's distinct historical and variation positions. Each uses the
+configured visit budget; sufficiently deep cached results are skipped. Historical
+results update the analysis map and progress without replacing the selected
+position's completed result or candidates. Navigation, backend/model changes,
+pause and benchmarks cancel the old epoch. Automatic play and previews take
+priority over history work. Disk caches keep up to 2,048 positions; the live map
+retains every requested position even for larger variation trees.
 
 ## UI semantics and language
 

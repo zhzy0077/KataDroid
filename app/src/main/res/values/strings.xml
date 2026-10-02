@@ -5,7 +5,7 @@
     <string name="settings">Settings</string>
     <string name="cancel">Cancel</string>
     <string name="search_automation">Search &amp; automatic moves</string>
-    <string name="search_limit">Search limit per position</string>
+    <string name="search_limit">Search budget</string>
     <string name="auto_black">Play Black automatically</string>
     <string name="auto_white">Play White automatically</string>
     <string name="katago_black">KataGo plays Black</string>
@@ -100,6 +100,9 @@
     <string name="preview_move_suffix"> + %1$d</string>
     <string name="move_location_suffix"> · %1$s</string>
     <string name="demo_record">Example game</string>
+    <string name="demo_match_record">AlphaGo vs Lee Sedol · Game 4</string>
+    <string name="history_progress">Analyzing record %1$d/%2$d · Turn KataGo off to pause</string>
+    <string name="continuous_analysis">Searching · Switch KataGo off to pause</string>
     <string name="free_play">Free play</string>
     <string name="start_position">Start</string>
     <string name="comment_node">Comment</string>
@@ -175,7 +178,7 @@
     <string name="backend_hint">Auto tries the available NPU runtime, then falls back to CPU if initialization fails. NPU mode reports failures without silently switching to CPU.</string>
     <string name="previous_speed">Last: %1$s visits/s · %2$d × %3$d · %4$s</string>
     <string name="model_weights">Weights: %1$s</string>
-    <string name="benchmark_visits_hint">%1$d visits per position, %2$d total. The game’s search limit is unchanged.</string>
+    <string name="benchmark_visits_hint">%1$d visits per position, %2$d total. The game’s search budget is unchanged.</string>
     <string name="benchmark_loading">Loading %1$s…</string>
     <string name="benchmark_warming">Warming up · %1$d visits</string>
     <string name="benchmark_failed">Benchmark failed: %1$s</string>
@@ -220,4 +223,7 @@
     <string name="model_report">%1$s · %2$s\nInitialization %3$.1f ms; inference median %4$.2f ms, P95 %5$.2f ms\n</string>
     <string name="model_case_report">%1$s: five output heads passed\nMax raw error %2$.5f; policy KL %3$.6f\nWin-rate error %4$.3f pp; score error %5$.3f points; ownership MAE %6$.5f\n</string>
     <string name="touch_offset_indicator">Touch offset: %1$d px up</string>
+    <string name="player_name_rank">%1$s %2$s</string>
+    <string name="player_mode_captures">%1$s · Captured %2$d</string>
+    <string name="npu_runtime_prepare_failed">Could not prepare the %1$s NPU runtime.</string>
 </resources>

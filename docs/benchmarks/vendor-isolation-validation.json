@@ -1,0 +1,87 @@
+{
+  "date": "2026-10-03",
+  "build": {
+    "version": "1.0.1",
+    "versionCode": 1003,
+    "debuggable": false,
+    "status": "release-signed local candidate, not a published release",
+    "apkSha256": "0839aee3c34a3fc3adfdd47f8505d9c8b60e73badabea977d394ef499bd670ad"
+  },
+  "checks": "Actual candidate runtime; instrumentation contains no KataGo/LiteRT native libraries",
+  "results": [
+    {
+      "soc": "Qualcomm Snapdragon 8 Elite",
+      "androidVersion": "17",
+      "validation": {
+        "verifySuite": {
+          "passed": true,
+          "nativeDelegate": "DispatchDelegate",
+          "observedCompleteGraphAssignments": 1,
+          "selectedDispatch": "Qualcomm",
+          "hardwareBufferTypes": [
+            "FastRpc",
+            "DmaBuf"
+          ]
+        },
+        "verifyHistory": {
+          "passed": true,
+          "nativeDelegate": "DispatchDelegate",
+          "observedCompleteGraphAssignments": 1,
+          "selectedDispatch": "Qualcomm",
+          "hardwareBufferTypes": [
+            "FastRpc",
+            "DmaBuf"
+          ],
+          "positions": 51,
+          "initialVisitsPerPosition": 500,
+          "selectedVisitsAfterHistory": 692
+        },
+        "b10Benchmark": {
+          "passed": true,
+          "model": "b10c128",
+          "nativeDelegate": "DispatchDelegate",
+          "completeGraphAssignments": 1,
+          "visitsPerPosition": 500,
+          "positions": 3
+        }
+      }
+    },
+    {
+      "soc": "MediaTek Dimensity 9300",
+      "androidVersion": "16",
+      "validation": {
+        "verifySuite": {
+          "passed": true,
+          "nativeDelegate": "DispatchDelegate",
+          "observedCompleteGraphAssignments": 1,
+          "selectedDispatch": "MediaTek",
+          "hardwareBufferTypes": [
+            "Ahwb",
+            "DmaBuf"
+          ]
+        },
+        "verifyHistory": {
+          "passed": true,
+          "nativeDelegate": "DispatchDelegate",
+          "observedCompleteGraphAssignments": 1,
+          "selectedDispatch": "MediaTek",
+          "hardwareBufferTypes": [
+            "Ahwb",
+            "DmaBuf"
+          ],
+          "positions": 51,
+          "initialVisitsPerPosition": 500,
+          "selectedVisitsAfterHistory": 536
+        },
+        "b10Benchmark": {
+          "passed": true,
+          "model": "b10c128",
+          "nativeDelegate": "DispatchDelegate",
+          "completeGraphAssignments": 1,
+          "visitsPerPosition": 500,
+          "positions": 3
+        }
+      }
+    }
+  ]
+}

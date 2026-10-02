@@ -63,9 +63,9 @@ an APK exists before a release is published and never selects an unverified bina
 
 Edit `index.html`, `styles.css`, and `site.js`. Every translated HTML/SVG string
 has paired `data-en` / `data-zh` attributes; names such as LiteRT, QNN and Neuron
-remain unchanged. Update both copies together. The variation-tree and engine
-screenshots currently exist only in English, with Chinese alt descriptions
-identifying their language. Add available locale screenshots to `ASSETS` in
+remain unchanged. Update both copies together. The variation-tree screenshot currently exists only in English, with a Chinese
+alt description identifying its language. Board, settings and engine screenshots
+use the corresponding English or Chinese assets. Add available locale screenshots to `ASSETS` in
 `tools/build_pages.py` and update the image selection in `site.js` when needed.
 
 Performance claims come from `docs/models-and-benchmarks.md`, architecture from

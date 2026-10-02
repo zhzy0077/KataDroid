@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-03",
+  "build": {
+    "version": "1.0.0",
+    "versionCode": 1003,
+    "tag": "v1.0.0",
+    "commit": "69f68fd82531132a47c26fcbb5ac2a558952a36e",
+    "debuggable": false,
+    "status": "Amended official release, downloaded from GitHub",
+    "apk": "KataDroid-1.0.0-arm64-v8a.apk",
+    "apkSha256": "c506bdef62deaf7f51f95899e9b13987a0e55fcbd649355daac5e9b3ca5d5ce4",
+    "workflowRun": "https://github.com/zhzy0077/KataDroid/actions/runs/37034321350"
+  },
+  "checks": "Actual installed official APK runtime; instrumentation has no KataGo/LiteRT native libraries",
+  "results": [
+    {
+      "soc": "Qualcomm Snapdragon 8 Elite",
+      "androidVersion": "17",
+      "numericalModels": [
+        "b6c96",
+        "b10c128"
+      ],
+      "numericalChecksPassed": true,
+      "searchCancellationRestartModelSwitchPassed": true,
+      "timedSearchPassed": true,
+      "history": {
+        "positions": 51,
+        "initialVisitsPerPosition": 500,
+        "selectedVisitsAfterHistory": 635,
+        "continuousSearchPassed": true
+      },
+      "nativeDelegation": {
+        "selectedDispatch": "Qualcomm",
+        "delegate": "DispatchDelegate",
+        "completeGraphAssignment": true,
+        "hardwareBufferTypes": [
+          "FastRpc",
+          "DmaBuf"
+        ]
+      }
+    },
+    {
+      "soc": "MediaTek Dimensity 9300",
+      "androidVersion": "16",
+      "numericalModels": [
+        "b6c96",
+        "b10c128"
+      ],
+      "numericalChecksPassed": true,
+      "searchCancellationRestartModelSwitchPassed": true,
+      "timedSearchPassed": true,
+      "history": {
+        "positions": 51,
+        "initialVisitsPerPosition": 500,
+        "selectedVisitsAfterHistory": 508,
+        "continuousSearchPassed": true
+      },
+      "nativeDelegation": {
+        "selectedDispatch": "MediaTek",
+        "delegate": "DispatchDelegate",
+        "completeGraphAssignment": true,
+        "hardwareBufferTypes": [
+          "Ahwb",
+          "DmaBuf"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,208 @@
+{
+  "date": "2026-10-03",
+  "device": {
+    "soc": "Qualcomm Snapdragon 8 Elite",
+    "socIdentifier": "SM8750",
+    "androidVersion": "17"
+  },
+  "build": {
+    "version": "1.0.0",
+    "versionCode": 1003,
+    "tag": "v1.0.0",
+    "commit": "69f68fd82531132a47c26fcbb5ac2a558952a36e",
+    "debuggable": false,
+    "apk": "KataDroid-1.0.0-arm64-v8a.apk",
+    "apkSha256": "c506bdef62deaf7f51f95899e9b13987a0e55fcbd649355daac5e9b3ca5d5ce4"
+  },
+  "method": "katago-1.18.2-search-v2",
+  "warmupVisits": 32,
+  "visitsPerPosition": 500,
+  "positionsPerTrial": 3,
+  "trialsPerConfiguration": 3,
+  "runtime": {
+    "liteRt": "2.2.0",
+    "qnn": "2.47.0",
+    "qualcommPlugin": "upstream qualcomm_runtime_v79"
+  },
+  "conditions": {
+    "foreground": true,
+    "screenKeptAwake": true,
+    "normalAnalysisPaused": true,
+    "compilationCache": "warm",
+    "performanceMode": "Not recorded",
+    "benchmarkPath": "Production controller; fresh session per trial",
+    "configurationOrder": [
+      "NPU b6c96",
+      "NPU b10c128"
+    ]
+  },
+  "validation": {
+    "instrumentation": "Both configurations passed without skips",
+    "nativeDelegation": "All six fresh runtimes fully assigned to DispatchDelegate; selected Qualcomm dispatch, QNN graph and FastRPC/DMA-BUF evidence verified"
+  },
+  "limitations": [
+    "Three short trials, not a sustained thermal or battery test",
+    "CPU performance was not measured on this device",
+    "Performance-mode setting was not recorded"
+  ],
+  "results": [
+    {
+      "model": "b6c96",
+      "backend": "NPU",
+      "medianVisitsPerSecond": 776.0400229707847,
+      "minimumVisitsPerSecond": 770.4377057279581,
+      "maximumVisitsPerSecond": 780.6157923586347,
+      "nativeDelegate": "DispatchDelegate",
+      "trials": [
+        {
+          "round": 1,
+          "initializationNanos": 145916406,
+          "warmupNanos": 51397708,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 558402188
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 707979114
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 655178593
+            }
+          ],
+          "visitsPerSecond": 780.6157923586347
+        },
+        {
+          "round": 2,
+          "initializationNanos": 81066562,
+          "warmupNanos": 71981302,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 570662292
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 696463855
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 665763853
+            }
+          ],
+          "visitsPerSecond": 776.0400229707847
+        },
+        {
+          "round": 3,
+          "initializationNanos": 83338229,
+          "warmupNanos": 78819739,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 565496355
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 729843541
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 651605313
+            }
+          ],
+          "visitsPerSecond": 770.4377057279581
+        }
+      ]
+    },
+    {
+      "model": "b10c128",
+      "backend": "NPU",
+      "medianVisitsPerSecond": 499.47726590714524,
+      "minimumVisitsPerSecond": 490.9861923455495,
+      "maximumVisitsPerSecond": 504.5904948710122,
+      "nativeDelegate": "DispatchDelegate",
+      "trials": [
+        {
+          "round": 1,
+          "initializationNanos": 189968594,
+          "warmupNanos": 71793334,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 656415625
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 1164466145
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 1151825832
+            }
+          ],
+          "visitsPerSecond": 504.5904948710122
+        },
+        {
+          "round": 2,
+          "initializationNanos": 128485104,
+          "warmupNanos": 95982656,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 687651824
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 1152766562
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 1162721301
+            }
+          ],
+          "visitsPerSecond": 499.47726590714524
+        },
+        {
+          "round": 3,
+          "initializationNanos": 129047395,
+          "warmupNanos": 97806666,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 676293646
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 1162345990
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 1216436094
+            }
+          ],
+          "visitsPerSecond": 490.9861923455495
+        }
+      ]
+    }
+  ]
+}

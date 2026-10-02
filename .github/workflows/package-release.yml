@@ -1,0 +1,101 @@
+name: Add ABI release APKs
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing published release tag
+        required: true
+        default: v1.0.0
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: '16111833'
+          packages: 'build-tools;36.0.0'
+          log-accepted-android-sdk-licenses: false
+      - name: Download and verify original release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?$ ]]; then
+            echo '::error::Expected a version tag such as v1.0.0.'
+            exit 1
+          fi
+          version="${RELEASE_TAG#v}"
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+          mkdir -p dist
+          gh release download "$RELEASE_TAG" --pattern "KataDroid-$version.apk" --pattern SHA256SUMS --dir dist
+          (cd dist && awk -v name="KataDroid-$version.apk" '$2 == name || $2 == "./" name' SHA256SUMS > original.sha256 && test -s original.sha256 && sha256sum -c original.sha256)
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "dist/KataDroid-$version.apk"
+          python3 tools/check_release_apk.py "dist/KataDroid-$version.apk"
+          python3 -m unittest discover -s tools/tests
+      - name: Create and verify signed ABI APKs
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::Missing signing configuration: $name."
+              exit 1
+            fi
+          done
+          umask 077
+          keystore="$RUNNER_TEMP/release.jks"
+          trap 'rm -f "$keystore"' EXIT
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$keystore"
+          tools="$ANDROID_HOME/build-tools/36.0.0"
+          original="dist/KataDroid-${RELEASE_VERSION}.apk"
+          variants="$RUNNER_TEMP/apk-variants"
+          python3 tools/split_release_apk.py "$original" "$variants"
+          original_cert=$("$tools/apksigner" verify --print-certs "$original" | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')
+          test -n "$original_cert"
+          for abi in arm64-v8a x86_64; do
+            apk="dist/KataDroid-${RELEASE_VERSION}-$abi.apk"
+            "$tools/zipalign" -P 16 -f 4 "$variants/$abi-unsigned.apk" "$RUNNER_TEMP/aligned-$abi.apk"
+            "$tools/apksigner" sign --ks "$keystore" --ks-key-alias "$KEY_ALIAS" \
+              --ks-pass env:KEYSTORE_PASSWORD --key-pass env:KEY_PASSWORD \
+              --out "$apk" "$RUNNER_TEMP/aligned-$abi.apk"
+            "$tools/apksigner" verify "$apk"
+            variant_cert=$("$tools/apksigner" verify --print-certs "$apk" | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')
+            test "$variant_cert" = "$original_cert"
+            "$tools/zipalign" -c -P 16 4 "$apk"
+            python3 tools/check_release_apk.py "$apk" --abis "$abi"
+          done
+          (cd dist && sha256sum ./*.apk > SHA256SUMS)
+      - name: Add assets to existing release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          gh release upload "$RELEASE_TAG" \
+            "dist/KataDroid-${RELEASE_VERSION}-arm64-v8a.apk" \
+            "dist/KataDroid-${RELEASE_VERSION}-x86_64.apk" --clobber
+          gh release upload "$RELEASE_TAG" dist/SHA256SUMS --clobber

@@ -129,49 +129,51 @@ An app for study. An engine underneath.
 </article>
 
 <article class="card">
-<span class="number">03</span><h3 data-en="Stop stale work. Keep results." data-zh="停止过期任务，保留结果。" >Stop stale work. Keep results.</h3><p data-en="Cancellation prevents old searches from publishing into a new position. Analysis and benchmarks share one worker; caches are separated by model hash and actual backend. Progressive updates start at 32 and 128 visits." data-zh="取消机制防止旧搜索覆盖新局面。分析与测速共用一个工作线程，缓存按模型哈希与实际后端隔离。渐进更新从 32、128 次访问开始。" >Cancellation prevents old searches from publishing into a new position. Analysis and benchmarks share one worker; caches are separated by model hash and actual backend. Progressive updates start at 32 and 128 visits.</p>
+<span class="number">03</span><h3 data-en="Stop stale work. Keep results." data-zh="停止过期任务，保留结果。" >Stop stale work. Keep results.</h3><p data-en="Cancellation prevents old searches from publishing into a new position. Analysis and benchmarks share one worker; caches are separated by model hash and actual backend. Analysis refreshes every 250 ms, fills record history, then continuously deepens the selected position." data-zh="取消机制防止旧搜索覆盖新局面。分析与测速共用一个工作线程，缓存按模型哈希与实际后端隔离。分析每 250 毫秒刷新，补齐棋谱历史后持续加深当前局面。" >Cancellation prevents old searches from publishing into a new position. Analysis and benchmarks share one worker; caches are separated by model hash and actual backend. Analysis refreshes every 250 ms, fills record history, then continuously deepens the selected position.</p>
 </article>
 </div><p data-en="NPU integration is vendor-specific: Qualcomm uses FastRPC tensor boundaries; experimental MediaTek uses AHWB/DMA-BUF and a runtime-selection patch. Native delegation audits establish whether graph execution actually runs on the NPU." data-zh="NPU 集成因厂商而异：Qualcomm 使用 FastRPC 张量边界；实验性的 MediaTek 支持使用 AHWB/DMA-BUF 与运行库选择补丁。通过原生委托审计确认计算图是否真正运行于 NPU。" class="tech-copy">NPU integration is vendor-specific: Qualcomm uses FastRPC tensor boundaries; experimental MediaTek uses AHWB/DMA-BUF and a runtime-selection patch. Native delegation audits establish whether graph execution actually runs on the NPU.</p>
 </section>
 
 <section class="measurements">
-<div data-en="03 / Measured search throughput" data-zh="03 / 实测搜索吞吐量" class="eyebrow">03 / Measured search throughput</div><h2 data-en="A few numbers. With context." data-zh="几组数字，说明白测量条件。" >A few numbers. With context.</h2><p data-en="Recorded search visits per second from debug builds. The AVD and MT6989 baselines were measured on 2 October 2026; Snapdragon comes from a prior exploratory run. Results include inference and search overhead." data-zh="已记录的 debug 构建搜索 visits/s。模拟器与 MT6989 基线测于 2026 年 10 月 2 日；骁龙数字来自此前的探索性测试。结果包含推理与搜索开销。" class="tech-copy">Recorded search visits per second from debug builds. The AVD and MT6989 baselines were measured on 2 October 2026; Snapdragon comes from a prior exploratory run. Results include inference and search overhead.</p><figure class="throughput-figure"><figcaption data-en="Two networks. One measured device." data-zh="两个网络，同一台实测设备。" >Two networks. One measured device.</figcaption><p data-en="MediaTek MT6989 · NPU · Android 16 · debug build" data-zh="MediaTek MT6989 · NPU · Android 16 · debug 构建" class="diagram-description">MediaTek MT6989 · NPU · Android 16 · debug build</p><svg class="throughput-chart" viewBox="0 0 900 260" role="img" aria-labelledby="throughput-title throughput-description"><title id="throughput-title" data-en="Search throughput on MediaTek MT6989 NPU" data-zh="MediaTek MT6989 NPU 搜索吞吐量">Search throughput on MediaTek MT6989 NPU</title><desc id="throughput-description" data-en="b6c96: 276.1 visits per second. b10c128: 225.9 visits per second. Both models use three fresh positions at 500 visits per position after a 32-visit warm-up." data-zh="b6c96：276.1 visits/s。b10c128：225.9 visits/s。两款模型均先预热 32 次访问，再测三个全新局面，每局面 500 次访问。">b6c96: 276.1 visits/s; b10c128: 225.9 visits/s.</desc>
-<g class="chart-grid"><path d="M145 25v175M325 25v175M505 25v175M685 25v175"/></g>
-<text x="20" y="72" class="chart-model">b6c96</text><rect x="145" y="40" width="497" height="45" rx="5" class="bar-light"/><text x="660" y="71" class="chart-number">276.1</text>
-<text x="20" y="150" class="chart-model">b10c128</text><rect x="145" y="118" width="407" height="45" rx="5" class="bar-large"/><text x="571" y="149" class="chart-number">225.9</text>
-<g class="chart-ticks"><text x="145" y="225">0</text><text x="325" y="225" text-anchor="middle">100</text><text x="505" y="225" text-anchor="middle">200</text><text x="685" y="225" text-anchor="middle">300</text><text x="790" y="225">visits/s</text></g></svg><p data-en="500 visits per position · three fresh positions · 32-visit warm-up. Initialization and warm-up excluded; native delegation audit completed. Throughput alone does not measure playing strength." data-zh="每局面 500 次访问 · 三个全新局面 · 32 次访问预热。不计初始化与预热；已完成原生委托审计。吞吐量本身不代表棋力。" class="diagram-footnote">500 visits per position · three fresh positions · 32-visit warm-up. Initialization and warm-up excluded; native delegation audit completed. Throughput alone does not measure playing strength.</p></figure><div class="table-wrap">
-<table>
-
-<caption>
-<span data-en="Recorded benchmark results · visits/s" data-zh="已记录的测速结果 · visits/s" >Recorded benchmark results · visits/s</span>
-</caption>
-
-<thead>
-
+<div data-en="03 / Measured search throughput" data-zh="03 / 实测搜索吞吐量" class="eyebrow">03 / Measured search throughput</div>
+<h2 data-en="A few numbers. With context." data-zh="几组数字，说明白测量条件。">A few numbers. With context.</h2>
+<p data-en="Phone results are three-trial medians from the amended official v1.0.0 arm64 APK (version code 1003), measured on 3 October 2026. Results include inference and search overhead. The AVD row is an earlier debug baseline." data-zh="手机数据来自修订后正式 v1.0.0 arm64 APK（版本号 1003），测于 2026 年 10 月 3 日，为三轮中位数。数据包含推理与搜索开销。模拟器行保留此前的 debug 基线。" class="tech-copy">Phone results are three-trial medians from the amended official v1.0.0 arm64 APK (version code 1003), measured on 3 October 2026. Results include inference and search overhead. The AVD row is an earlier debug baseline.</p>
+<figure class="throughput-figure">
+<figcaption data-en="Two networks. One measured device." data-zh="两个网络，同一台实测设备。">Two networks. One measured device.</figcaption>
+<p data-en="MediaTek Dimensity 9300 (MT6989) · NPU · Android 16 · v1.0.0" data-zh="MediaTek Dimensity 9300（MT6989）· NPU · Android 16 · v1.0.0" class="diagram-description">MediaTek Dimensity 9300 (MT6989) · NPU · Android 16 · v1.0.0</p>
+<svg class="throughput-chart" viewBox="0 0 900 260" role="img" aria-labelledby="throughput-title throughput-description">
+<title data-en="Search throughput on Dimensity 9300 NPU" data-zh="Dimensity 9300 NPU 搜索吞吐量" id="throughput-title">Search throughput on Dimensity 9300 NPU</title>
+<desc data-en="b6c96: 340.1 visits per second. b10c128: 272.8 visits per second. Medians of three trials, with three fresh positions at 500 visits each after a 32-visit warm-up." data-zh="b6c96：340.1 visits/s。b10c128：272.8 visits/s。三轮中位数；每轮预热 32 次访问，再测三个全新局面，每局面 500 次访问。" id="throughput-description">b6c96: 340.1 visits per second. b10c128: 272.8 visits per second. Medians of three trials, with three fresh positions at 500 visits each after a 32-visit warm-up.</desc>
+<g class="chart-grid"><path d="M145 25v175M295 25v175M445 25v175M595 25v175M745 25v175"/></g>
+<text x="20" y="72" class="chart-model">b6c96</text><rect x="145" y="40" width="510.2" height="45" rx="5" class="bar-light"/><text x="673.2" y="71" class="chart-number">340.1</text>
+<text x="20" y="150" class="chart-model">b10c128</text><rect x="145" y="118" width="409.2" height="45" rx="5" class="bar-large"/><text x="572.2" y="149" class="chart-number">272.8</text>
+<g class="chart-ticks"><text x="145" y="225" text-anchor="middle">0</text><text x="295" y="225" text-anchor="middle">100</text><text x="445" y="225" text-anchor="middle">200</text><text x="595" y="225" text-anchor="middle">300</text><text x="745" y="225" text-anchor="middle">400</text><text x="790" y="225">visits/s</text></g></svg>
+<p data-en="500 visits per position · three fresh positions per trial · three trials · 32-visit warm-up. Initialization and warm-up excluded. Throughput alone does not measure playing strength." data-zh="每局面 500 次访问 · 每轮三个全新局面 · 三轮 · 预热 32 次访问。不计初始化与预热；吞吐量本身不代表棋力。" class="diagram-footnote">500 visits per position · three fresh positions per trial · three trials · 32-visit warm-up. Initialization and warm-up excluded. Throughput alone does not measure playing strength.</p>
+</figure><div class="table-wrap"><table><caption>
+<span data-en="Recorded benchmark results · visits/s" data-zh="已记录的测速结果 · visits/s">Recorded benchmark results · visits/s</span>
+</caption><thead><tr>
+<th data-en="Environment / actual backend" data-zh="环境 / 实际后端" scope="col">Environment / actual backend</th>
+<th scope="col">b6c96</th><th scope="col">b10c128</th>
+<th data-en="Visits / position" data-zh="访问数 / 局面" scope="col">Visits / position</th>
+</tr></thead><tbody>
 <tr>
-<th data-en="Environment / actual backend" data-zh="环境 / 实际后端" scope="col">Environment / actual backend</th><th data-en="b6c96" data-zh="b6c96" scope="col">b6c96</th><th data-en="b10c128" data-zh="b10c128" scope="col">b10c128</th><th data-en="Visits / position" data-zh="访问数 / 局面" scope="col">Visits / position</th>
-</tr>
-
-</thead>
-
-<tbody>
-
+<th data-en="Snapdragon 8 Elite / NPU" data-zh="骁龙 8 Elite / NPU" scope="row">Snapdragon 8 Elite / NPU</th>
+<td>776.0</td><td>499.5</td><td>500</td></tr>
 <tr>
-<th data-en="Android Studio AVD / CPU" data-zh="Android Studio 模拟器 / CPU" scope="row">Android Studio AVD / CPU</th><td>121.8</td><td>44.8</td><td>100</td>
-</tr>
-
+<th data-en="Dimensity 9300 / NPU" data-zh="天玑 9300 / NPU" scope="row">Dimensity 9300 / NPU</th>
+<td>340.1</td><td>272.8</td><td>500</td></tr>
 <tr>
-<th data-en="MediaTek MT6989 / NPU" data-zh="MediaTek MT6989 / NPU" scope="row">MediaTek MT6989 / NPU</th><td>276.1</td><td>225.9</td><td>500</td>
-</tr>
-
+<th data-en="Dimensity 9300 / CPU" data-zh="天玑 9300 / CPU" scope="row">Dimensity 9300 / CPU</th>
+<td>94.6</td><td>21.2</td><td>500</td></tr>
 <tr>
-<th data-en="Snapdragon 8 Elite / NPU" data-zh="骁龙 8 Elite / NPU" scope="row">Snapdragon 8 Elite / NPU</th><td>665.0</td><td data-en="Unverified" data-zh="未验证" >Unverified</td><td>500</td>
-</tr>
-
-</tbody>
-
-</table>
-</div><details class="method"><summary><span data-en="How these results were measured" data-zh="这些结果如何测得" >How these results were measured</span></summary><p data-en="Each run warms up for 32 visits, then measures three fresh positions: empty board, an eight-move opening, and a position after capture. Trees and neural caches are cleared between positions. Throughput = total actual visits ÷ total search time; initialization and warm-up are excluded." data-zh="每轮先预热 32 次访问，再测三个全新局面：空棋盘、八手开局与吃子后局面。局面之间清空搜索树与神经网络缓存。吞吐量 = 实际总访问数 ÷ 总搜索时间；不计初始化与预热。" >Each run warms up for 32 visits, then measures three fresh positions: empty board, an eight-move opening, and a position after capture. Trees and neural caches are cleared between positions. Throughput = total actual visits ÷ total search time; initialization and warm-up are excluded.</p><p data-en="AVD CPU figures depend on the host computer and are not phone CPU measurements. The MT6989 run completed the both-model native delegation audit. Snapdragon’s b6 result is exploratory; its combined both-model audit did not complete and b10 performance is unverified. Different environments and visit budgets do not establish a CPU-to-NPU speedup. These short runs do not measure sustained thermal behavior, battery use or playing strength." data-zh="模拟器 CPU 数字依赖宿主机，不代表手机 CPU 性能。MT6989 完成了双模型原生委托审计。骁龙 b6 数字来自探索性测速，双模型联合审计未完成，b10 性能未验证。不同环境与访问预算不能用于计算 CPU 到 NPU 的加速比。短时测试未评估持续温升、电池消耗或棋力。" >AVD CPU figures depend on the host computer and are not phone CPU measurements. The MT6989 run completed the both-model native delegation audit. Snapdragon’s b6 result is exploratory; its combined both-model audit did not complete and b10 performance is unverified. Different environments and visit budgets do not establish a CPU-to-NPU speedup. These short runs do not measure sustained thermal behavior, battery use or playing strength.</p></details><div class="tech-links"><a data-en="Architecture ↗" data-zh="集成架构 ↗" href="https://github.com/zhzy0077/KataDroid/blob/main/docs/katago-integration.md">Architecture ↗</a><a data-en="Model conversion ↗" data-zh="模型转换 ↗" href="https://github.com/zhzy0077/KataDroid/blob/main/docs/model-conversion.md">Model conversion ↗</a><a data-en="Measurements &amp; methodology ↗" data-zh="测量与方法 ↗" href="https://github.com/zhzy0077/KataDroid/blob/main/docs/models-and-benchmarks.md">Measurements & methodology ↗</a><a data-en="NPU runtime setup ↗" data-zh="NPU 运行库配置 ↗" href="https://github.com/zhzy0077/KataDroid/blob/main/docs/npu.md">NPU runtime setup ↗</a></div>
+<th data-en="Android Studio AVD / CPU (debug)" data-zh="Android Studio 模拟器 / CPU（debug）" scope="row">Android Studio AVD / CPU (debug)</th>
+<td>121.8</td><td>44.8</td><td>100</td></tr></tbody></table></div><details class="method"><summary>
+<span data-en="How these results were measured" data-zh="这些结果如何测得">How these results were measured</span>
+</summary>
+<p data-en="Each phone configuration completed three trials through the production benchmark controller, with a fresh session per trial. Each trial warms up for 32 visits, then measures three fresh positions: empty board, an eight-move opening, and a position after capture. Trees and neural caches are cleared between positions. Throughput = total actual visits ÷ total search time; initialization and warm-up are excluded. The table reports the median of the three trials." data-zh="每组手机配置通过正式版测速控制器完成三轮，每轮使用新的引擎会话。先预热 32 次访问，再测三个全新局面：空棋盘、八手开局与吃子后局面。局面之间清空搜索树与神经网络缓存。吞吐量 = 实际总访问数 ÷ 总搜索时间；不计初始化与预热。表格显示三轮中位数。">Each phone configuration completed three trials through the production benchmark controller, with a fresh session per trial. Each trial warms up for 32 visits, then measures three fresh positions: empty board, an eight-move opening, and a position after capture. Trees and neural caches are cleared between positions. Throughput = total actual visits ÷ total search time; initialization and warm-up are excluded. The table reports the median of the three trials.</p>
+<p data-en="Snapdragon NPU ranges (b6 / b10): 770.4–780.6 / 491.0–504.6 visits/s; its performance-mode setting was not recorded. Dimensity performance mode was enabled by the user: NPU ranges 338.7–340.2 / 270.7–274.0, CPU ranges 94.1–94.6 / 20.3–21.6." data-zh="骁龙 NPU 范围（b6 / b10）：770.4–780.6 / 491.0–504.6 visits/s，未记录性能模式设置。天玑由用户开启性能模式：NPU 范围 338.7–340.2 / 270.7–274.0，CPU 范围 94.1–94.6 / 20.3–21.6。">Snapdragon NPU ranges (b6 / b10): 770.4–780.6 / 491.0–504.6 visits/s; its performance-mode setting was not recorded. Dimensity performance mode was enabled by the user: NPU ranges 338.7–340.2 / 270.7–274.0, CPU ranges 94.1–94.6 / 20.3–21.6.</p>
+<p data-en="Both phones passed both-model NPU numerical, lifecycle and full-record continuous-analysis checks using the actual published APK. Native logs confirmed complete vendor delegation for both models; Dimensity retained one graph-assignment record per model, so its per-trial native trace is incomplete. AVD CPU figures depend on the host computer. Snapdragon CPU was not measured. These short foreground runs do not measure sustained thermal behavior, battery use or playing strength." data-zh="两台手机使用实际发布 APK，通过了双模型 NPU 数值、生命周期及完整棋谱持续分析验证。原生日志确认两个模型完整厂商委派；天玑每个模型保留一条图委派记录，各轮原生记录不完整。模拟器 CPU 数字依赖宿主机；未测骁龙 CPU。前台短测不代表持续温升、电池消耗或棋力。">Both phones passed both-model NPU numerical, lifecycle and full-record continuous-analysis checks using the actual published APK. Native logs confirmed complete vendor delegation for both models; Dimensity retained one graph-assignment record per model, so its per-trial native trace is incomplete. AVD CPU figures depend on the host computer. Snapdragon CPU was not measured. These short foreground runs do not measure sustained thermal behavior, battery use or playing strength.</p>
+</details><div class="tech-links"><a data-en="Architecture ↗" data-zh="集成架构 ↗" href="https://github.com/zhzy0077/KataDroid/blob/main/docs/katago-integration.md">Architecture ↗</a><a data-en="Model conversion ↗" data-zh="模型转换 ↗" href="https://github.com/zhzy0077/KataDroid/blob/main/docs/model-conversion.md">Model conversion ↗</a><a data-en="Measurements &amp; methodology ↗" data-zh="测量与方法 ↗" href="https://github.com/zhzy0077/KataDroid/blob/main/docs/models-and-benchmarks.md">Measurements & methodology ↗</a><a data-en="NPU runtime setup ↗" data-zh="NPU 运行库配置 ↗" href="https://github.com/zhzy0077/KataDroid/blob/main/docs/npu.md">NPU runtime setup ↗</a></div>
 </section>
 </div>
 </main>

@@ -17,13 +17,19 @@ neural inference. No account or analysis server is required.
 ## Features
 
 - Play either color manually, let KataGo play Black or White, or enable both for self-play.
-- Toggle analysis from the top-right switch; set a search budget from 1 to 50,000 visits.
+- Toggle analysis from the top-right switch; set an initial/history/automatic-play budget from 1 to 50,000 visits.
 - Candidate colors reflect **win-rate loss relative to the best evaluated move**,
   from the player-to-move perspective: near-best green, then yellow, then red.
   Three near-equal opening moves can all be green at about 50% win rate.
 - Hold a candidate to preview its variation. Tap the win-rate chart or a tree
   node to navigate the game; earlier branches and saved analyses remain available.
+- Opening a game analyzes the current position first, then fills the whole SGF's
+  history and variations to build a win-rate curve from the opening onward.
+  Once history is complete, the selected position keeps searching until KataGo is paused.
+  Live search snapshots refresh about every 250 ms.
+- Candidate markers are hidden whenever either player is automatic; win rates remain available.
 - Import/export 19×19 SGF with variations, comments, player metadata and root setup stones.
+  Player panels display SGF names and ranks (kyu, dan or professional).
 - Chinese, Japanese and Korean rules; komi from −400 to 400, including decimals.
 - Physical-pixel touch offset, drag-to-preview placement and a larger landscape board.
 - Switch between bundled b6c96 and b10c128 networks, select Auto / CPU / NPU,
@@ -31,6 +37,10 @@ neural inference. No account or analysis server is required.
 - English and Simplified Chinese interfaces, following Android's app/system language.
 
 ## How to use
+
+Download from [GitHub Releases](https://github.com/zhzy0077/KataDroid/releases).
+Choose **arm64-v8a** for phones and tablets, **x86_64** for x86 devices/emulators,
+or the universal APK for both architectures. ARMv7 is not supported.
 
 Build and install the app using the instructions below. Open the three-dot menu
 to **Clear board**, **Import SGF**, **Export SGF** or open **Settings**. Tap an
@@ -40,9 +50,13 @@ once at the bottom. If automatic play is paused, tap **Resume auto** in the
 player status area to continue. Open **Engines & models** to choose a model and
 benchmark it.
 
+The visit setting is the initial budget for each position. The app fills the
+record history at that budget before continuously deepening the selected position.
+Its visit counter can stay at 500 while historical positions are being analyzed.
+
 Android 13+ supports choosing English or Chinese in system Settings → Apps →
-KataDroid → Language. The app initially opens an illustrative game; its analysis
-and candidate values come from real search.
+KataDroid → Language. The app initially opens the first 50 moves of AlphaGo–Lee Sedol, game 4
+(2016-03-13); analysis and candidate values come from real search.
 
 ## Device and SoC compatibility
 
@@ -53,10 +67,16 @@ APK, the device's vendor drivers and the selected network.
 
 | Device / SoC or environment | Backend | Current test coverage |
 | --- | --- | --- |
-| Qualcomm Snapdragon 8 Elite device | LiteRT / QNN NPU | b6c96 numerical, search and native delegation checks passed. The combined both-model benchmark/lifecycle audit did not complete; b10c128 performance remains unverified. |
-| MediaTek MT6989 device | LiteRT / Neuron NPU, experimental | b6c96 and b10c128 numerical, search/lifecycle and benchmark checks passed with native delegation evidence, using patched plugins. |
+| Qualcomm Snapdragon 8 Elite device | LiteRT / QNN NPU | Both models passed numerical, search, cancellation/restart, full-record continuous analysis and native delegation checks on the amended v1.0.0 APK (version code 1003). |
+| MediaTek Dimensity 9300 (MT6989) device | LiteRT / Neuron NPU, experimental | b6c96 and b10c128 numerical, search/lifecycle and benchmark checks passed with native delegation evidence, using patched plugins. |
 | Android Studio x86_64 AVD, API 37 | CPU | UI and CPU regression baseline; performance depends on the host computer. |
 | Other phones / SoCs | CPU; NPU where a compatible runtime is available | Compatibility feedback welcome. The results above do not establish support for other SoC generations or every phone with the same SoC. |
+
+**Amended v1.0.0:** the original APK could load MediaTek dispatch on Qualcomm
+and fail with `HostMemory`. The official release workflow rebuilt all three APKs
+with vendor-specific plugin directories. The new APKs use version code **1003**
+(original: 1002), keep the same signing key, and passed NPU validation on both
+SoCs. Re-download and install the APK to upgrade in place.
 
 A clean checkout builds a **CPU-capable APK**. NPU plugins are optional:
 see [NPU setup](docs/npu.md) for Qualcomm setup and the experimental MediaTek
@@ -69,20 +89,24 @@ Check the actual backend shown in the app when reporting a result.
 
 These are real KataGo search **visits per second**, including search and inference
 work. Initialization and warm-up are excluded. Each run measures three fresh
-positions after a 32-visit warm-up; all results below use debug builds.
+positions after a 32-visit warm-up. Production rows are medians of three trials
+on the amended **v1.0.0** arm64 APK, version code **1003**.
 
 | Environment / actual backend | Visits per position | b6c96 visits/s | b10c128 visits/s |
 | --- | ---: | ---: | ---: |
-| Snapdragon 8 Elite / NPU, Android 17 | 500 | 665.0 (exploratory) | Unverified |
-| MediaTek MT6989 / NPU, Android 16 | 500 | 276.1 | 225.9 |
-| Android Studio API 37 AVD / CPU | 100 | 121.8 | 44.8 |
+| Snapdragon 8 Elite / NPU, Android 17, v1.0.0 | 500 | 776.0 | 499.5 |
+| Dimensity 9300 (MT6989) / CPU, Android 16, v1.0.0 | 500 | 94.6 | 21.2 |
+| Dimensity 9300 (MT6989) / NPU, Android 16, v1.0.0 | 500 | 340.1 | 272.8 |
+| Android Studio API 37 AVD / CPU, debug | 100 | 121.8 | 44.8 |
 
-The Snapdragon b6 result is from a completed individual measurement; the combined
-both-model audit was interrupted. The MediaTek results are from a completed
-native delegation audit with LiteRT 2.2.0 and Neuron USDK 8.2.26. AVD numbers are
-host-dependent simulator results, not phone CPU measurements, so these rows
-cannot establish a CPU-to-NPU speedup. Short runs do not establish sustained
-thermal performance, battery use or playing strength.
+Native logs confirmed complete vendor NPU delegation for both models.
+Snapdragon NPU trial ranges were 770.4–780.6 / 491.0–504.6 visits/s
+(b6 / b10); its performance-mode setting was not recorded. Dimensity had
+performance mode enabled by the user: CPU ranges were 94.1–94.6 /
+20.3–21.6, and NPU ranges 338.7–340.2 / 270.7–274.0.
+These short foreground tests exclude initialization and warm-up, with ordinary
+analysis paused. They do not establish sustained thermal performance or playing
+strength. AVD figures depend on the host computer.
 
 See [models, methodology and sanitized measurements](docs/models-and-benchmarks.md)
 for timings, runtime details and validation limits. In the app, open
@@ -126,8 +150,8 @@ adb -s <target-serial> install -r app/build/outputs/apk/debug/app-debug.apk
 The included assets make a CPU build possible without Python, model downloads or
 conversion tools. For the optional NPU plugins, see [NPU setup](docs/npu.md).
 Release APKs require your own signing configuration; never commit signing keys.
-Pushing a version tag such as `v1.0.0` builds a signed APK and publishes it as a
-GitHub Release once the repository's signing secrets are configured. See
+Pushing a version tag such as `v1.0.0` builds signed arm64-v8a, x86_64 and
+universal APKs and publishes them as a GitHub Release once the repository's signing secrets are configured. See
 [tagged APK release setup](CONTRIBUTING.md#tagged-apk-releases).
 
 ```bash

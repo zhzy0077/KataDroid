@@ -14,7 +14,7 @@ ASSETS = {
     'app-architecture.png': 'site/artwork/app-architecture.png',
     **{f'{name}.png': f'docs/images/{name}.png' for name in (
         'analysis-en', 'analysis-zh', 'variations-en', 'settings-en',
-        'settings-zh', 'engine-en',
+        'settings-zh', 'engine-en', 'engine-zh',
     )},
 }
 

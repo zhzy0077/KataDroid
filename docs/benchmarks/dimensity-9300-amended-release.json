@@ -1,0 +1,376 @@
+{
+  "date": "2026-10-03",
+  "device": {
+    "soc": "MediaTek Dimensity 9300",
+    "socIdentifier": "MT6989",
+    "androidVersion": "16"
+  },
+  "build": {
+    "version": "1.0.0",
+    "versionCode": 1003,
+    "tag": "v1.0.0",
+    "commit": "69f68fd82531132a47c26fcbb5ac2a558952a36e",
+    "debuggable": false,
+    "apk": "KataDroid-1.0.0-arm64-v8a.apk",
+    "apkSha256": "c506bdef62deaf7f51f95899e9b13987a0e55fcbd649355daac5e9b3ca5d5ce4"
+  },
+  "method": "katago-1.18.2-search-v2",
+  "warmupVisits": 32,
+  "visitsPerPosition": 500,
+  "positionsPerTrial": 3,
+  "trialsPerConfiguration": 3,
+  "runtime": {
+    "liteRt": "2.2.0",
+    "neuronUsdk": "8.2.26",
+    "mediatekPlugin": "patched runtime selection"
+  },
+  "conditions": {
+    "foreground": true,
+    "normalAnalysisPaused": true,
+    "onBattery": true,
+    "compilationCache": "warm",
+    "screenKeptAwake": true,
+    "performanceMode": "Enabled by user",
+    "benchmarkPath": "Production controller; fresh session per trial",
+    "configurationOrder": [
+      "NPU b6c96",
+      "NPU b10c128",
+      "CPU b6c96",
+      "CPU b10c128"
+    ],
+    "batteryTemperatureBeforeCelsius": 29.6,
+    "batteryTemperatureAfterCelsius": 30.6
+  },
+  "validation": {
+    "instrumentation": "All four configurations passed without skips",
+    "nativeDelegation": "All CPU runtimes assigned to XNNPACK; complete MediaTek DispatchDelegate graphs observed for both NPU models with Neuron load and AHWB/DMA-BUF evidence. Per-trial NPU native logs are incomplete."
+  },
+  "limitations": [
+    "Three short trials, not a sustained thermal or battery test",
+    "NPU native logs contain one graph-assignment record per model rather than all three runtime openings; all three rounds passed strict NPU buffer/backend checks",
+    "User-reported b6 480 visits/s was not reproduced in this controlled batch",
+    "Configurations measured sequentially; speedup ratios do not isolate scheduling or thermal effects"
+  ],
+  "results": [
+    {
+      "model": "b6c96",
+      "backend": "CPU",
+      "medianVisitsPerSecond": 94.55203947726415,
+      "minimumVisitsPerSecond": 94.11284436596384,
+      "maximumVisitsPerSecond": 94.57883938313074,
+      "nativeDelegate": "TfLiteXNNPackDelegate",
+      "nativeGraphAssignmentsRecorded": 3,
+      "trials": [
+        {
+          "round": 1,
+          "initializationNanos": 50467462,
+          "warmupNanos": 283810385,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 4623473923
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 5806807539
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 5508031848
+            }
+          ],
+          "visitsPerSecond": 94.11284436596384
+        },
+        {
+          "round": 2,
+          "initializationNanos": 61056923,
+          "warmupNanos": 376776077,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 4702023463
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 5774500307
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 5383260615
+            }
+          ],
+          "visitsPerSecond": 94.57883938313074
+        },
+        {
+          "round": 3,
+          "initializationNanos": 67201846,
+          "warmupNanos": 365010231,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 4638293232
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 5810804924
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 5415181539
+            }
+          ],
+          "visitsPerSecond": 94.55203947726415
+        }
+      ]
+    },
+    {
+      "model": "b10c128",
+      "backend": "CPU",
+      "medianVisitsPerSecond": 21.237766779057967,
+      "minimumVisitsPerSecond": 20.338796050027298,
+      "maximumVisitsPerSecond": 21.620682212874343,
+      "nativeDelegate": "TfLiteXNNPackDelegate",
+      "nativeGraphAssignmentsRecorded": 3,
+      "trials": [
+        {
+          "round": 1,
+          "initializationNanos": 92143154,
+          "warmupNanos": 965995154,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 9397190770
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 21477806693
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 38503016849
+            }
+          ],
+          "visitsPerSecond": 21.620682212874343
+        },
+        {
+          "round": 2,
+          "initializationNanos": 108768692,
+          "warmupNanos": 951169154,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 9272953308
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 26406130155
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 38071594616
+            }
+          ],
+          "visitsPerSecond": 20.338796050027298
+        },
+        {
+          "round": 3,
+          "initializationNanos": 104733154,
+          "warmupNanos": 989857846,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 9214772385
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 23126702080
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 38287420541
+            }
+          ],
+          "visitsPerSecond": 21.237766779057967
+        }
+      ]
+    },
+    {
+      "model": "b6c96",
+      "backend": "NPU",
+      "medianVisitsPerSecond": 340.0840362163743,
+      "minimumVisitsPerSecond": 338.6744788278205,
+      "maximumVisitsPerSecond": 340.20045691398025,
+      "nativeDelegate": "DispatchDelegate",
+      "nativeGraphAssignmentsRecorded": 1,
+      "trials": [
+        {
+          "round": 1,
+          "initializationNanos": 277186231,
+          "warmupNanos": 82613539,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 1337195462
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 1570727001
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 1502752077
+            }
+          ],
+          "visitsPerSecond": 340.0840362163743
+        },
+        {
+          "round": 2,
+          "initializationNanos": 126150461,
+          "warmupNanos": 88182461,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 1300037847
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 1628446461
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 1500547384
+            }
+          ],
+          "visitsPerSecond": 338.6744788278205
+        },
+        {
+          "round": 3,
+          "initializationNanos": 130482461,
+          "warmupNanos": 96171308,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 1306859692
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 1602462000
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 1499843462
+            }
+          ],
+          "visitsPerSecond": 340.20045691398025
+        }
+      ]
+    },
+    {
+      "model": "b10c128",
+      "backend": "NPU",
+      "medianVisitsPerSecond": 272.8053026327732,
+      "minimumVisitsPerSecond": 270.68141334122254,
+      "maximumVisitsPerSecond": 274.02418510237976,
+      "nativeDelegate": "DispatchDelegate",
+      "nativeGraphAssignmentsRecorded": 1,
+      "trials": [
+        {
+          "round": 1,
+          "initializationNanos": 316838846,
+          "warmupNanos": 124021769,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 1252854385
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 2115663000
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 2105452000
+            }
+          ],
+          "visitsPerSecond": 274.02418510237976
+        },
+        {
+          "round": 2,
+          "initializationNanos": 180976615,
+          "warmupNanos": 116745000,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 1283965692
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 2121056924
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 2136547385
+            }
+          ],
+          "visitsPerSecond": 270.68141334122254
+        },
+        {
+          "round": 3,
+          "initializationNanos": 187116000,
+          "warmupNanos": 120130538,
+          "samples": [
+            {
+              "label": "empty",
+              "visits": 500,
+              "nanos": 1239790616
+            },
+            {
+              "label": "opening",
+              "visits": 500,
+              "nanos": 2120886154
+            },
+            {
+              "label": "capture",
+              "visits": 500,
+              "nanos": 2137750077
+            }
+          ],
+          "visitsPerSecond": 272.8053026327732
+        }
+      ]
+    }
+  ]
+}

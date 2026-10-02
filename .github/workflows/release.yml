@@ -20,6 +20,21 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      - name: Free disk for native plugin build
+        run: |
+          set -euo pipefail
+          sdk_root="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          # This disposable release runner does not need other language stacks,
+          # preinstalled NDK versions or emulator images.
+          sudo rm -rf /usr/share/dotnet /usr/local/.ghcup /opt/ghc \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/boost /usr/share/swift \
+            "$sdk_root/ndk" "$sdk_root/system-images"
+          df -h .
+          available_kb=$(df -Pk . | awk 'NR == 2 { print $4 }')
+          if (( available_kb < 25 * 1024 * 1024 )); then
+            echo '::error::The native release build needs at least 25 GiB free disk.'
+            exit 1
+          fi
       - name: Validate release tag and signing configuration
         env:
           RELEASE_TAG: ${{ github.ref_name }}
@@ -54,11 +69,18 @@ jobs:
       - name: Install Android toolchain
         run: sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0' 'ndk;28.2.13676358' 'cmake;3.22.1'
       - name: Check bundled source and models
-        run: python3 tools/check_integrity.py
+        run: |
+          python3 tools/check_integrity.py
+          python3 -m unittest discover -s tools/tests
       - name: Prepare Qualcomm NPU plugins
         run: python3 tools/prepare_npu.py
       - name: Build patched MediaTek NPU plugins
-        run: ANDROID_NDK_HOME="$ANDROID_HOME/ndk/28.2.13676358" bash tools/prepare_mediatek_npu.sh
+        run: |
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/28.2.13676358"
+          export NPU_BAZEL_OUTPUT_ROOT="$RUNNER_TEMP/mediatek-bazel"
+          bash tools/prepare_mediatek_npu.sh
+          .local/mediatek-npu-build/bazel --output_user_root="$NPU_BAZEL_OUTPUT_ROOT" shutdown
+          rm -rf "$NPU_BAZEL_OUTPUT_ROOT"
       - name: Test and build release APK
         run: |
           ./gradlew :app:testDebugUnitTest :app:lintRelease :app:assembleRelease \
@@ -78,15 +100,28 @@ jobs:
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$keystore"
           tools="$ANDROID_HOME/build-tools/36.0.0"
           mkdir -p dist
-          apk="dist/KataDroid-${RELEASE_VERSION}.apk"
-          "$tools/zipalign" -P 16 -f 4 app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned.apk"
-          "$tools/apksigner" sign --ks "$keystore" --ks-key-alias "$KEY_ALIAS" \
-            --ks-pass env:KEYSTORE_PASSWORD --key-pass env:KEY_PASSWORD \
-            --out "$apk" "$RUNNER_TEMP/aligned.apk"
-          "$tools/apksigner" verify "$apk"
-          "$tools/zipalign" -c -P 16 4 "$apk"
-          python3 tools/check_release_apk.py "$apk"
-          (cd dist && sha256sum "KataDroid-${RELEASE_VERSION}.apk" > SHA256SUMS)
+          source_apk="app/build/outputs/apk/release/app-release-unsigned.apk"
+          variants="$RUNNER_TEMP/apk-variants"
+          python3 tools/split_release_apk.py "$source_apk" "$variants"
+          for abi in universal arm64-v8a x86_64; do
+            if [[ "$abi" == universal ]]; then
+              input="$source_apk"
+              apk="dist/KataDroid-${RELEASE_VERSION}.apk"
+              abis=(arm64-v8a x86_64)
+            else
+              input="$variants/$abi-unsigned.apk"
+              apk="dist/KataDroid-${RELEASE_VERSION}-$abi.apk"
+              abis=("$abi")
+            fi
+            "$tools/zipalign" -P 16 -f 4 "$input" "$RUNNER_TEMP/aligned-$abi.apk"
+            "$tools/apksigner" sign --ks "$keystore" --ks-key-alias "$KEY_ALIAS" \
+              --ks-pass env:KEYSTORE_PASSWORD --key-pass env:KEY_PASSWORD \
+              --out "$apk" "$RUNNER_TEMP/aligned-$abi.apk"
+            "$tools/apksigner" verify "$apk"
+            "$tools/zipalign" -c -P 16 4 "$apk"
+            python3 tools/check_release_apk.py "$apk" --abis "${abis[@]}"
+          done
+          (cd dist && sha256sum ./*.apk > SHA256SUMS)
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -95,9 +130,11 @@ jobs:
         run: |
           set -euo pipefail
           cat > "$RUNNER_TEMP/release-notes.md" <<'NOTES'
-          Signed universal APK for Android 13+ (arm64-v8a and x86_64).
+          Signed APKs for Android 13+: choose arm64-v8a for phones, x86_64 for emulators, or the universal APK containing both. ARMv7 is not supported.
 
-          This build includes offline CPU inference, the bundled b6c96 and b10c128 models, Qualcomm LiteRT/QNN plugins and experimental patched MediaTek LiteRT/Neuron plugins. NPU execution depends on your SoC and vendor drivers; Auto falls back to CPU if NPU initialization fails. See docs/npu.md and README.md for setup and tested compatibility.
+          Arm64 and universal builds include offline CPU inference, the bundled b6c96 and b10c128 models, Qualcomm LiteRT/QNN plugins and experimental patched MediaTek LiteRT/Neuron plugins. The x86_64 APK supports CPU inference. NPU execution depends on your SoC and vendor drivers; Auto falls back to CPU if NPU initialization fails. See docs/npu.md and README.md for setup and tested compatibility.
+
+          This build isolates Qualcomm and MediaTek compiler/dispatch libraries so LiteRT loads the selected vendor's NPU runtime. It includes full SGF history analysis followed by continuous selected-position search. For the amended v1.0.0, install this newly built APK over the earlier v1.0.0; its higher Android version code permits an in-place upgrade.
 
           Compatibility reports are welcome: include phone model, SoC, Android version, model, actual backend and benchmark visits/s. See README.md for measured results and reporting details.
           NOTES
@@ -105,7 +142,17 @@ jobs:
           if [[ "$RELEASE_TAG" == *-* ]]; then
             flags+=(--prerelease)
           fi
-          gh release create "$RELEASE_TAG" dist/*.apk dist/SHA256SUMS \
-            --draft --verify-tag --title "KataDroid $RELEASE_TAG" --generate-notes \
-            --notes-file "$RUNNER_TEMP/release-notes.md" "${flags[@]}"
+          if draft=$(gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft'); then
+            if [[ "$draft" != true ]]; then
+              echo '::error::An existing release must be explicitly placed in draft before replacing its APKs.'
+              exit 1
+            fi
+            gh release upload "$RELEASE_TAG" dist/*.apk dist/SHA256SUMS --clobber
+            gh release edit "$RELEASE_TAG" --title "KataDroid $RELEASE_TAG" \
+              --notes-file "$RUNNER_TEMP/release-notes.md" --target "$GITHUB_SHA"
+          else
+            gh release create "$RELEASE_TAG" dist/*.apk dist/SHA256SUMS \
+              --draft --verify-tag --title "KataDroid $RELEASE_TAG" --generate-notes \
+              --notes-file "$RUNNER_TEMP/release-notes.md" "${flags[@]}"
+          fi
           gh release edit "$RELEASE_TAG" --draft=false

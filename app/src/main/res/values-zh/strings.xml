@@ -5,7 +5,7 @@
     <string name="settings">设置</string>
     <string name="cancel">取消</string>
     <string name="search_automation">搜索与自动落子</string>
-    <string name="search_limit">每个局面的搜索上限</string>
+    <string name="search_limit">搜索预算</string>
     <string name="auto_black">黑棋自动落子</string>
     <string name="auto_white">白棋自动落子</string>
     <string name="katago_black">由 KataGo 执黑</string>
@@ -100,6 +100,9 @@
     <string name="preview_move_suffix"> 手 + %1$d</string>
     <string name="move_location_suffix"> 手 · %1$s</string>
     <string name="demo_record">示例棋谱</string>
+    <string name="demo_match_record">AlphaGo 对李世石 · 第四局</string>
+    <string name="history_progress">棋谱分析 %1$d/%2$d · 关闭 KataGo 可暂停</string>
+    <string name="continuous_analysis">持续分析中 · 关闭 KataGo 可暂停</string>
     <string name="free_play">自由对弈</string>
     <string name="start_position">开局</string>
     <string name="comment_node">注释</string>
@@ -120,7 +123,7 @@
     <string name="analysis_description">第 %1$d 手，%2$s，%3$s</string>
     <string name="pass_preview">%1$s · 停一手 · 查看变化</string>
     <string name="board_scoring">%1$s规则 · 盘面计分</string>
-    <string name="cached_visits">已有 %1$d visits · 新搜索上限 %2$d</string>
+    <string name="cached_visits">已有 %1$d visits · 新搜索预算 %2$d</string>
     <string name="last_analyzed">最后已分析第 %1$d 手</string>
     <string name="black_wins">黑棋胜</string>
     <string name="white_wins">白棋胜</string>
@@ -175,7 +178,7 @@
     <string name="backend_hint">自动模式尝试可用的 NPU 运行时，初始化失败时使用 CPU；手选 NPU 会明确报告错误，不会静默回退。</string>
     <string name="previous_speed">上次 %1$s visits/s · %2$d × %3$d · %4$s</string>
     <string name="model_weights">当前权重：%1$s</string>
-    <string name="benchmark_visits_hint">每局面 %1$d visits，共 %2$d；不改变棋局搜索上限。</string>
+    <string name="benchmark_visits_hint">每局面 %1$d visits，共 %2$d；不改变棋局搜索预算。</string>
     <string name="benchmark_loading">正在加载 %1$s…</string>
     <string name="benchmark_warming">预热中 · %1$d visits</string>
     <string name="benchmark_failed">测试失败：%1$s</string>
@@ -220,4 +223,7 @@
     <string name="model_report">%1$s · %2$s\n初始化 %3$.1f ms；推理中位数 %4$.2f ms，P95 %5$.2f ms\n</string>
     <string name="model_case_report">%1$s：五个输出头通过\n最大原始误差 %2$.5f；策略 KL %3$.6f\n胜率差 %4$.3f 个百分点；目数差 %5$.3f 目；归属 MAE %6$.5f\n</string>
     <string name="touch_offset_indicator">触点上移 %1$d px</string>
+    <string name="player_name_rank">%1$s %2$s</string>
+    <string name="player_mode_captures">%1$s · 提子 %2$d</string>
+    <string name="npu_runtime_prepare_failed">无法准备 %1$s NPU 运行时。</string>
 </resources>

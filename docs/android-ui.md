@@ -4,7 +4,8 @@
 
 ## Board and analysis
 
-The first launch opens an illustrative 19×19 record. Open the three-dot menu and
+The first launch opens the first 50 main-line moves of AlphaGo–Lee Sedol,
+game 4 (2016-03-13), with move 50 selected. Open the three-dot menu and
 choose **Clear board** to start a fresh game using the current rules and komi.
 Both players are manual by default. Tap a legal intersection to play; an occupied
 point, suicide forbidden by the rules or a ko violation is rejected by KataGo.
@@ -14,6 +15,15 @@ The top-right KataGo switch controls analysis. Turning it off retains saved
 results. A position without saved analysis shows no invented win rate or moves.
 The graph and headline percentage use Black's perspective; candidate colors use
 the player whose turn it is.
+
+With KataGo enabled, opening a saved game or importing an SGF analyzes the current
+position first, then fills every historical and variation position using the
+configured visit budget. The win-rate chart updates as each position completes;
+the footer shows record-analysis progress. Sufficient cached results are reused.
+Turn KataGo off to pause, and back on to resume unfinished work. Navigation gives
+the newly selected position priority. History work pauses during automatic play,
+variation previews, settings/engine pages and while the app is in the background.
+Long records and large visit budgets take more time to finish.
 
 Candidate labels A/B/C preserve KataGo's recommendation order. Their colors show
 loss against the best evaluated legal candidate: up to 2 percentage points is
@@ -44,7 +54,7 @@ shows a **Resume auto** button. It also enables KataGo if needed. The menu's
 **Resume automatic moves** action remains available. Importing or reopening a
 record also pauses automatic moves until explicitly resumed.
 
-<img src="images/variations-en.png" width="360" alt="Interactive game tree with branches and zoom controls" />
+<img src="images/variations-en.png" width="360" alt="Interactive game tree for the 50-move sample with zoom controls" />
 
 ## Settings
 
@@ -55,7 +65,7 @@ it, and rule changes are validated before any part of the draft is saved. Apply
 before leaving Settings; an unapplied draft survives Activity recreation but is
 not committed when navigating away.
 
-- **Search limit:** 1–50,000 visits per position; default 500. Larger budgets take longer.
+- **Search budget:** 1–50,000 visits for initial analysis, historical positions and automatic moves; default 500. After history finishes, the selected position keeps searching until KataGo is paused. Candidate hints are hidden whenever either player is automatic.
 - **Automatic moves:** enable Black, White or both. The KataGo switch must also be on.
 - **Rules and komi:** Chinese, Korean or Japanese; −400 to 400, including decimals.
   Positive komi is awarded to White. Rule changes apply to the current record and
