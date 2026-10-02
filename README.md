@@ -6,6 +6,72 @@ An Android Go board with offline KataGo analysis, variations and SGF editing.
 The app runs the official KataGo search and rules engine locally, with LiteRT
 neural inference. No account or analysis server is required.
 
+## Device and SoC compatibility
+
+KataDroid targets **Android 13 / API 33 or newer**, with `arm64-v8a` and `x86_64`
+builds. CPU inference works independently of phone brand or SoC; the app has no
+model or SoC allowlist. NPU acceleration depends on the plugins included in your
+APK, the device's vendor drivers and the selected network.
+
+| Device / SoC or environment | Backend | Current test coverage |
+| --- | --- | --- |
+| Qualcomm Snapdragon 8 Elite device | LiteRT / QNN NPU | b6c96 numerical, search and native delegation checks passed. The combined both-model benchmark/lifecycle audit did not complete; b10c128 performance remains unverified. |
+| MediaTek MT6989 device | LiteRT / Neuron NPU, experimental | b6c96 and b10c128 numerical, search/lifecycle and benchmark checks passed with native delegation evidence, using patched plugins. |
+| Android Studio x86_64 AVD, API 37 | CPU | UI and CPU regression baseline; performance depends on the host computer. |
+| Other phones / SoCs | CPU; NPU where a compatible runtime is available | Compatibility feedback welcome. The results above do not establish support for other SoC generations or every phone with the same SoC. |
+
+A clean checkout builds a **CPU-capable APK**. NPU plugins are optional:
+see [NPU setup](docs/npu.md) for Qualcomm setup and the experimental MediaTek
+source build and runtime patch. Samsung NPU plugins are not included.
+**Auto** tries a packaged NPU runtime and falls back to CPU if initialization
+fails. Explicit **NPU** mode reports errors instead of silently switching backend.
+Check the actual backend shown in the app when reporting a result.
+
+## Measured performance
+
+These are real KataGo search **visits per second**, including search and inference
+work. Initialization and warm-up are excluded. Each run measures three fresh
+positions after a 32-visit warm-up; all results below use debug builds.
+
+| Environment / actual backend | Visits per position | b6c96 visits/s | b10c128 visits/s |
+| --- | ---: | ---: | ---: |
+| Snapdragon 8 Elite / NPU, Android 17 | 500 | 665.0 (exploratory) | Unverified |
+| MediaTek MT6989 / NPU, Android 16 | 500 | 276.1 | 225.9 |
+| Android Studio API 37 AVD / CPU | 100 | 121.8 | 44.8 |
+
+The Snapdragon b6 result is from a completed individual measurement; the combined
+both-model audit was interrupted. The MediaTek results are from a completed
+native delegation audit with LiteRT 2.2.0 and Neuron USDK 8.2.26. AVD numbers are
+host-dependent simulator results, not phone CPU measurements, so these rows
+cannot establish a CPU-to-NPU speedup. Short runs do not establish sustained
+thermal performance, battery use or playing strength.
+
+See [models, methodology and sanitized measurements](docs/models-and-benchmarks.md)
+for timings, runtime details and validation limits. In the app, open
+**Engines & models** to benchmark your own device. b6c96 is the lighter network;
+b10c128 is larger. More visits/s alone does not mean stronger play.
+
+## Share compatibility test feedback
+
+**Reports from other devices are welcome, including failures and CPU fallback.**
+[Open a compatibility report](https://github.com/zhzy0077/KataDroid/issues/new)
+with:
+
+- Phone manufacturer and model, **SoC name** and Android version.
+- App version or commit, APK source, and which NPU plugins were packaged, if known.
+- Selected model (b6c96 or b10c128), requested backend (Auto / CPU / NPU), and the
+  **actual backend** reported by the app.
+- Whether analysis and automatic play work; for a benchmark, include visits per
+  position and measured visits/s for each tested model.
+- For a failure, the error message and steps to reproduce. Mention warm/cold runs,
+  repeated runs or noticeable heating when relevant to performance.
+
+App benchmark results are useful compatibility feedback. A claim of validated
+NPU execution also needs native delegation evidence; selecting NPU or completing
+CPU fallback does not prove the NPU ran. Contributors can use the
+[dedicated NPU audit](docs/npu.md). Share sanitized results and app-only screenshots;
+omit device serials, account details and local paths.
+
 <p align="center">
   <img src="docs/images/analysis-en.png" width="31%" alt="Go board with KataGo candidates and clickable win-rate chart" />
   <img src="docs/images/settings-en.png" width="31%" alt="Settings with a single persistent Apply all changes button" />
@@ -34,26 +100,13 @@ Build and install the app using the instructions below. Open the three-dot menu
 to **Clear board**, **Import SGF**, **Export SGF** or open **Settings**. Tap an
 intersection to play. The KataGo switch enables analysis; both colors are manual
 by default. In Settings, edit the desired options and tap **Apply all changes**
-once at the bottom. Open **Engines & models** to choose a model and benchmark it.
+once at the bottom. If automatic play is paused, tap **Resume auto** in the
+player status area to continue. Open **Engines & models** to choose a model and
+benchmark it.
 
 Android 13+ supports choosing English or Chinese in system Settings → Apps →
 KataDroid → Language. The app initially opens an illustrative game; its analysis
 and candidate values come from real search.
-
-## Compatibility
-
-- Android **13 / API 33 or newer**; `arm64-v8a` and `x86_64` builds.
-- CPU inference is available independently of phone brand or SoC. There is no
-  device-model or SoC allowlist.
-- Auto tries an installed NPU runtime and falls back to CPU if initialization
-  fails. Explicit NPU mode reports errors rather than silently changing backend.
-- Optional NPU integrations include Qualcomm LiteRT/QNN and experimental MediaTek
-  Neuron plugins built from patched LiteRT source. See [NPU setup](docs/npu.md).
-  Support depends on the runtime, drivers, model and hardware. Samsung NPU
-  plugins are not included.
-- UI and CPU regression testing uses Android Studio AVDs. Physical NPU validation
-  so far has covered **Snapdragon 8 Elite and MediaTek MT6989**; this is test coverage,
-  not an app restriction. See the [performance notes](docs/models-and-benchmarks.md).
 
 ## Build
 
