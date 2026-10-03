@@ -16,11 +16,12 @@ python3 tools/check_integrity.py
 CI runs these checks without optional NPU plugins. Lint version suggestions do
 not require an unrelated dependency upgrade. There is no signing material in Git.
 
-## AVD integration tests
+## Device integration tests
 
-Use an Android Studio x86_64 virtual device with Android 13 or newer. The current
-CPU/UI baseline uses an API 37 image with 16 KiB pages. Choose the actual serial
-from `adb devices -l`; never run an unqualified multi-device install or test.
+Use an Android Studio virtual device or a connected physical device with Android
+13 or newer and an ABI supported by the APK. The current CPU/UI baseline uses an
+x86_64 API 37 AVD image with 16 KiB pages. Choose the actual serial from
+`adb devices -l`; never run an unqualified multi-device install or test.
 
 ```bash
 adb devices -l
@@ -41,9 +42,9 @@ the instrumentation runner component. Raw output belongs in `.local/`, not Git.
 
 ## Physical NPU tests
 
-Schedule these explicitly. Use [the NPU audit](docs/npu.md); do not run routine
-UI tests, take screenshots or change a physical device's display settings as part
-of normal development. The audit runs instrumentation without launching an Activity.
+Schedule these explicitly. Use [the NPU audit](docs/npu.md). Do not change a
+physical device's display settings as part of routine testing. The audit runs
+instrumentation without launching an Activity.
 
 ## Changes and release preparation
 
@@ -94,7 +95,7 @@ Repeat with `CPU` / `NPU` and `b6c96` / `b10c128`. Require completed trials and
 passing instrumentation; for NPU, also audit native delegation and vendor graph
 loading as in the dedicated NPU checks above. Keep raw reports out of Git and
 publish only sanitized counters, timings and build identity. Routine CPU and UI
-regression tests still use Android Studio AVDs.
+regression tests may use Android Studio AVDs or connected physical devices.
 
 ## Tagged APK releases
 

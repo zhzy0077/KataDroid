@@ -134,7 +134,9 @@ jobs:
 
           Arm64 and universal builds include offline CPU inference, the bundled b6c96 and b10c128 models, Qualcomm LiteRT/QNN plugins and experimental patched MediaTek LiteRT/Neuron plugins. The x86_64 APK supports CPU inference. NPU execution depends on your SoC and vendor drivers; Auto falls back to CPU if NPU initialization fails. See docs/npu.md and README.md for setup and tested compatibility.
 
-          This build isolates Qualcomm and MediaTek compiler/dispatch libraries so LiteRT loads the selected vendor's NPU runtime. It includes full SGF history analysis followed by continuous selected-position search. For the amended v1.0.0, install this newly built APK over the earlier v1.0.0; its higher Android version code permits an in-place upgrade.
+          This build isolates Qualcomm and MediaTek compiler/dispatch libraries so LiteRT loads the selected vendor's NPU runtime. It includes full SGF history analysis followed by continuous selected-position search. Release APKs use increasing Android version codes and the same signing identity to support in-place upgrades.
+
+          Version 1.0.1 fixes importing valid deeply nested SGF files, including OGS exports that wrap each move in a subtree. Parsing now uses an explicit stack while retaining file-size and node-count limits. Regression tests cover deep nesting, branching and malformed input. Device-side SGF tests verified import, navigation through all 176 moves, export/reimport and saved-state restoration of the reported game. This validation does not constitute an NPU execution audit.
 
           Compatibility reports are welcome: include phone model, SoC, Android version, model, actual backend and benchmark visits/s. See README.md for measured results and reporting details.
           NOTES

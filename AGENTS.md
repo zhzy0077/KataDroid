@@ -1,10 +1,8 @@
 # Development conventions
 
-- Use Android Studio virtual devices for UI, interaction, general features, CPU
-  inference and regression tests. Do not substitute a connected phone if an AVD
-  is unavailable.
-- Physical devices are for explicitly scheduled NPU integration, numerical and
-  performance work. Do not run routine UI tests or change their display settings.
+- UI, interaction, general features, CPU inference and regression tests may run
+  on Android Studio virtual devices or connected physical devices. Do not change
+  physical devices' display settings as part of routine testing.
 - Every device operation must select an explicit serial (`adb -s <serial>`).
   Inspect `adb devices -l` first. AVD serials are not stable identifiers.
 - CPU results do not validate NPU execution. NPU tests skip when the packaged
