@@ -56,12 +56,44 @@ class SgfCodecTest {
 
     @Test
     fun malformedAndUnsupportedDocumentsAreRejectedInsteadOfReinterpreted() {
-        listOf("", "(;C[unfinished)", "(;B[aa]B[bb])", "(;B)", "(;B[aa])trailing").forEach { source ->
+        listOf("", "(;C[unfinished)", "(;B[aa]B[bb])", "(;B)", "(;B[aa])trailing", "()", "((;B[aa]))", "(;B[aa](;W[bb]);B[cc])", "(;B[aa](;W[bb])").forEach { source ->
             assertThrows("$source should fail", IllegalArgumentException::class.java) { SgfCodec.parse(source) }
         }
         listOf("(;SZ[9])", "(;RU[Chinese-OGS])", "(;B[tt]W[])", "(;KM[NaN])", "(;AB[aa]AW[aa])", "(;SZ[19];AB[bb])").forEach { source ->
             assertThrows(RuntimeException::class.java) { SgfGame.from(SgfCodec.parse(source).single(), GoRules.CHINESE, 7.5f) }
         }
+    }
+
+    @Test
+    fun ogsStyleNestedMainLineImportsAllMovesAndAnnotations() {
+        // OGS can put each subsequent move in its own subtree, without any forks.
+        val source = "(;FF[4]CA[UTF-8]GM[1]SZ[19]KM[0.5]RU[Japanese];B[pp];W[dd]" +
+            (3..176).joinToString("") { "(;${if (it % 2 == 1) "B" else "W"}[]" } +
+            "C[谢谢!\n]" + ")".repeat(175)
+        val root = SgfCodec.decode(source.toByteArray()).single()
+        val game = SgfGame.from(root, GoRules.CHINESE, 7.5f)
+        assertEquals(GoRules.JAPANESE, game.rules)
+        assertEquals(0.5f, game.komi, 0f)
+        assertEquals(177, game.nodes.size)
+        assertEquals(176, game.nodes.last().move)
+        assertTrue(game.nodes.all { it.lane == 0 })
+        assertEquals("谢谢!\n", game.nodes.last().properties["C"]?.single())
+        val restored = SgfGame.from(SgfCodec.decode(SgfCodec.encode(root).toByteArray()).single(), GoRules.CHINESE, 7.5f)
+        assertEquals(game, restored)
+    }
+
+    @Test
+    fun deeplyNestedTreesPreserveBranchesAndStillEnforceNodeLimit() {
+        val source = "(;SZ[19]" + "(;C[node]".repeat(5000) +
+            "(;B[aa])(;B[bb])" + ")".repeat(5001)
+        var node = SgfCodec.parse(source).single()
+        repeat(5000) { node = node.children.single() }
+        assertEquals(listOf("aa", "bb"), node.children.map { it.properties.getValue("B").single() })
+        var restored = SgfCodec.parse(SgfCodec.encode(SgfCodec.parse(source).single())).single()
+        repeat(5000) { restored = restored.children.single() }
+        assertEquals(node, restored)
+        val tooMany = "(;C[node]".repeat(SgfCodec.MAX_NODES + 1) + ")".repeat(SgfCodec.MAX_NODES + 1)
+        assertThrows(IllegalArgumentException::class.java) { SgfCodec.parse(tooMany) }
     }
 
     @Test

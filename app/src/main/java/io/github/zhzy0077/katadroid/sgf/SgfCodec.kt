@@ -92,30 +92,52 @@ object SgfCodec {
             whitespace()
             while (index < text.length) {
                 require(roots.size < 100) { "At most 100 games per file are supported" }
-                roots += tree(0)
+                roots += tree()
                 whitespace()
             }
             require(roots.isNotEmpty()) { "SGF file is empty" }
             return roots
         }
-        fun tree(depth: Int): SgfNode {
-            require(depth <= 128) { "SGF variations are nested too deeply" }
-            expect('(')
-            var root: SgfNode? = null
-            var last: SgfNode? = null
-            whitespace()
-            while (text.getOrNull(index) == ';') {
-                index++
-                if (++nodes > MAX_NODES) fail("SGF has more than $MAX_NODES nodes")
-                val node = SgfNode(properties())
-                if (root == null) root = node else last!!.children += node
-                last = node
+        fun tree(): SgfNode {
+            // Some exporters wrap every move in a subtree, even without branching.
+            // Use heap-backed frames so valid long games do not exhaust the call stack.
+            // MAX_BYTES and MAX_NODES bound both input and frame allocation.
+            class Frame {
+                var root: SgfNode? = null
+                var last: SgfNode? = null
+                var variationsStarted = false
             }
-            if (last == null) fail("SGF variation has no nodes")
-            whitespace()
-            while (text.getOrNull(index) == '(') { last.children += tree(depth + 1); whitespace() }
-            expect(')')
-            return checkNotNull(root)
+            expect('(')
+            val frames = ArrayDeque<Frame>()
+            frames.addLast(Frame())
+            while (true) {
+                whitespace()
+                val frame = frames.last()
+                when (text.getOrNull(index)) {
+                    ';' -> {
+                        if (frame.variationsStarted) fail("SGF sequence cannot follow variations")
+                        index++
+                        if (++nodes > MAX_NODES) fail("SGF has more than $MAX_NODES nodes")
+                        val node = SgfNode(properties())
+                        if (frame.root == null) frame.root = node else frame.last!!.children += node
+                        frame.last = node
+                    }
+                    '(' -> {
+                        if (frame.last == null) fail("SGF variation has no nodes")
+                        frame.variationsStarted = true
+                        index++
+                        frames.addLast(Frame())
+                    }
+                    ')' -> {
+                        val root = frame.root ?: fail("SGF variation has no nodes")
+                        index++
+                        frames.removeLast()
+                        if (frames.isEmpty()) return root
+                        frames.last().last!!.children += root
+                    }
+                    else -> fail("Expected SGF node, variation or closing parenthesis")
+                }
+            }
         }
         fun value(): String {
             expect('[')
