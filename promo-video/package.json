@@ -1,0 +1,45 @@
+{
+  "name": "katadroid-promo-video",
+  "version": "0.1.0",
+  "private": true,
+  "description": "KataDroid 中文宣传片：Remotion 工程与 MiMo 配音工作流",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "prepare": "node scripts/prepare-assets.mjs",
+    "dev": "npm run prepare && remotion studio src/index.ts --port=3100",
+    "check": "tsc --noEmit && node --test scripts/*.test.mjs && python3 -m unittest discover -s scripts -p 'test_*.py' -v",
+    "tts:sample": "npm run prepare && python3 scripts/mimo_tts.py",
+    "render:sample": "npm run prepare && node scripts/render.mjs",
+    "render:stills": "npm run prepare && node scripts/render.mjs --stills-only",
+    "verify:sample": "python3 scripts/verify-sample.py",
+    "tts:final": "npm run prepare && python3 scripts/mimo_tts.py --plan content/promo.zh-CN.json",
+    "render:final": "npm run prepare && node scripts/render.mjs --final",
+    "render:final:stills": "npm run prepare && node scripts/render.mjs --final --stills-only",
+    "verify:final": "python3 scripts/verify-sample.py --final && node scripts/verify-qr.mjs",
+    "tts:tutorial": "npm run prepare && python3 scripts/mimo_tts.py --plan content/tutorial.zh-CN.json",
+    "render:tutorial": "npm run prepare && node scripts/render.mjs --tutorial",
+    "render:tutorial:stills": "npm run prepare && node scripts/render.mjs --tutorial --stills-only",
+    "verify:tutorial": "python3 scripts/verify-sample.py --tutorial && python3 scripts/verify_tutorial.py"
+  },
+  "dependencies": {
+    "@fontsource-variable/noto-sans-sc": "5.3.0",
+    "@remotion/bundler": "4.0.534",
+    "@remotion/cli": "4.0.534",
+    "@remotion/renderer": "4.0.534",
+    "qrcode": "1.5.4",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "remotion": "4.0.534"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "jsqr": "1.4.0",
+    "typescript": "5.9.3"
+  }
+}

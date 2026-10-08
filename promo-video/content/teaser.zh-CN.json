@@ -1,0 +1,32 @@
+{
+  "id": "KataDroid-Teaser-ZH",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "durationInFrames": 300,
+  "voice": "白桦",
+  "style": "用清晰、温暖、笃定的普通话介绍一款围棋应用。音色和音量保持稳定，语速稍快但咬字清楚，停顿简洁，句尾自然收住。像向朋友介绍自己喜欢的产品，语气自然。KataGo 读作「卡塔狗」。只朗读给定文本。",
+  "clips": [
+    {
+      "id": "hook",
+      "from": 12,
+      "slotSeconds": 2.8,
+      "text": "把 KataGo 装进口袋。",
+      "caption": "把 KataGo 装进口袋"
+    },
+    {
+      "id": "analysis",
+      "from": 111,
+      "slotSeconds": 2.8,
+      "text": "离线分析，看懂局势。",
+      "caption": "离线分析，看懂局势"
+    },
+    {
+      "id": "promise",
+      "from": 216,
+      "slotSeconds": 2.5,
+      "text": "让每一步，都有思路。",
+      "caption": "让每一步，都有思路"
+    }
+  ]
+}

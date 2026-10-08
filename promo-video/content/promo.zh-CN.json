@@ -1,0 +1,209 @@
+{
+  "id": "KataDroid-Promo-ZH",
+  "slug": "katadroid-promo-zh-54s",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "durationInFrames": 1620,
+  "manifest": "audio/promo-manifest.json",
+  "voice": "白桦",
+  "style": "用清晰、温暖、笃定的普通话介绍一款围棋应用。延续自然、克制的产品介绍风格，音色和音量保持稳定，每秒约四个汉字，咬字清楚，句尾自然收住。像向朋友介绍自己喜欢的产品。KataGo 读作「卡塔狗」。SGF 按三个英文字母朗读。KataDroid 按英文品牌名朗读。只朗读给定文本。",
+  "scenes": [
+    {
+      "id": "intro",
+      "from": 0,
+      "duration": 150,
+      "eyebrow": "随身的围棋分析伙伴",
+      "lines": [
+        "下一手，",
+        "还能怎么下？"
+      ],
+      "caption": "把 KataGo 装进口袋"
+    },
+    {
+      "id": "offline",
+      "from": 150,
+      "duration": 240,
+      "eyebrow": "01 / 离线分析",
+      "lines": [
+        "打开棋盘。",
+        "开始思考。"
+      ],
+      "body": [
+        "手机本地运行 KataGo。",
+        "无需账号，离线也能分析。"
+      ],
+      "media": "offline"
+    },
+    {
+      "id": "preview",
+      "from": 390,
+      "duration": 270,
+      "eyebrow": "02 / 候选与变化",
+      "lines": [
+        "看见落点。",
+        "也看见后续。"
+      ],
+      "body": [
+        "推荐落点、胜率与目数差。",
+        "长按候选点，预览后续变化。"
+      ],
+      "media": "preview"
+    },
+    {
+      "id": "review",
+      "from": 660,
+      "duration": 270,
+      "eyebrow": "03 / 回看关键一手",
+      "lines": [
+        "胜率转折，",
+        "一触回看。"
+      ],
+      "body": [
+        "点击胜率走势，跳转对应局面。",
+        "让每次得失，都有迹可循。"
+      ],
+      "media": "review"
+    },
+    {
+      "id": "tree",
+      "from": 930,
+      "duration": 270,
+      "eyebrow": "04 / 探索不同走法",
+      "lines": [
+        "每种思路，",
+        "都能留下。"
+      ],
+      "body": [
+        "从历史局面试下新变化。",
+        "通过变化树，切换不同分支。"
+      ],
+      "media": "tree"
+    },
+    {
+      "id": "play",
+      "from": 1200,
+      "duration": 240,
+      "eyebrow": "05 / 对弈与棋谱",
+      "lines": [
+        "复盘之外，",
+        "也能练棋。"
+      ],
+      "body": [
+        "让 AI 陪你对弈练习。",
+        "SGF 导入与导出，随时继续复盘。"
+      ],
+      "media": "play"
+    },
+    {
+      "id": "close",
+      "from": 1440,
+      "duration": 180,
+      "eyebrow": "你的下一手，从这里开始",
+      "lines": [
+        "每一步，",
+        "都有思路。"
+      ]
+    }
+  ],
+  "clips": [
+    {
+      "id": "question",
+      "from": 9,
+      "slotSeconds": 2.3,
+      "text": "下一手，还能怎么下？",
+      "caption": "下一手，还能怎么下？"
+    },
+    {
+      "id": "pocket",
+      "from": 84,
+      "slotSeconds": 1.9,
+      "text": "把 KataGo 装进口袋。",
+      "caption": "把 KataGo 装进口袋"
+    },
+    {
+      "id": "offline",
+      "from": 163,
+      "slotSeconds": 3.3,
+      "text": "离线运行，无需账号。",
+      "caption": "离线运行，无需账号"
+    },
+    {
+      "id": "start",
+      "from": 267,
+      "slotSeconds": 3.5,
+      "text": "打开棋盘，就能开始分析。",
+      "caption": "打开棋盘，就能开始分析"
+    },
+    {
+      "id": "candidates",
+      "from": 403,
+      "slotSeconds": 4.2,
+      "text": "推荐落点、胜率和目数差，一眼看清。",
+      "caption": "推荐落点、胜率和目数差，一眼看清"
+    },
+    {
+      "id": "preview",
+      "from": 540,
+      "slotSeconds": 3.6,
+      "text": "长按候选点，预览后续变化。",
+      "caption": "长按候选点，预览后续变化"
+    },
+    {
+      "id": "chart",
+      "from": 672,
+      "slotSeconds": 4.2,
+      "text": "点击胜率走势，回到关键一手。",
+      "caption": "点击胜率走势，回到关键一手"
+    },
+    {
+      "id": "review",
+      "from": 808,
+      "slotSeconds": 3.5,
+      "text": "让每次得失，都有迹可循。",
+      "caption": "让每次得失，都有迹可循"
+    },
+    {
+      "id": "branches",
+      "from": 943,
+      "slotSeconds": 4.2,
+      "text": "试下新变化，再从变化树切换分支。",
+      "caption": "试下新变化，再从变化树切换分支"
+    },
+    {
+      "id": "ideas",
+      "from": 1086,
+      "slotSeconds": 3.3,
+      "text": "每一种思路，都能保留下来。",
+      "caption": "每一种思路，都能保留下来"
+    },
+    {
+      "id": "play",
+      "from": 1213,
+      "slotSeconds": 2.8,
+      "text": "让 AI 陪你对弈练习。",
+      "caption": "让 AI 陪你对弈练习"
+    },
+    {
+      "id": "sgf",
+      "from": 1304,
+      "slotSeconds": 4,
+      "text": "SGF 棋谱，自由导入导出。",
+      "caption": "SGF 棋谱，自由导入导出"
+    },
+    {
+      "id": "promise",
+      "from": 1452,
+      "slotSeconds": 2.5,
+      "text": "让每一步，都有思路。",
+      "caption": "让每一步，都有思路"
+    },
+    {
+      "id": "download",
+      "from": 1536,
+      "slotSeconds": 2.5,
+      "text": "KataDroid，免费下载。",
+      "caption": "KataDroid，免费下载"
+    }
+  ]
+}

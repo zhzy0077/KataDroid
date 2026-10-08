@@ -1,0 +1,149 @@
+{
+  "id": "KataDroid-Tutorial-ZH",
+  "slug": "katadroid-tutorial-zh-vertical-58s",
+  "title": "KataDroid 一分钟竖屏复盘教程",
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "durationInFrames": 1740,
+  "manifest": "audio/tutorial-manifest.json",
+  "voice": "白桦",
+  "style": "用清晰、温暖、耐心的普通话讲解围棋应用的操作。保持自然稳定的教学语气，语速舒缓，每秒约三到四个汉字，给步骤之间留一点停顿。音色和音量保持稳定，咬字清晰。KataGo 读作「卡塔狗」。SGF、AI、A、B、C 按英文字母朗读。KataDroid 按英文品牌名朗读。只朗读给定文本。",
+  "scenes": [
+    {
+      "id": "intro",
+      "from": 0,
+      "duration": 90,
+      "eyebrow": "一分钟入门",
+      "title": "跟着转折学复盘",
+      "tip": "导入 → 分析 → 回看 → 预览 → 保存",
+      "media": "hero.png"
+    },
+    {
+      "id": "import",
+      "from": 90,
+      "duration": 210,
+      "eyebrow": "01 / 导入棋谱",
+      "title": "打开完整对局",
+      "tip": "三点菜单 → 导入 SGF → 选择棋谱",
+      "media": "import-menu.mp4"
+    },
+    {
+      "id": "analysis",
+      "from": 300,
+      "duration": 240,
+      "eyebrow": "02 / 开始分析",
+      "title": "开启 KataGo",
+      "tip": "主胜率以黑棋为准 · 历史曲线逐步补齐",
+      "media": "analysis.mp4"
+    },
+    {
+      "id": "review",
+      "from": 540,
+      "duration": 420,
+      "eyebrow": "03 / 找到转折",
+      "title": "点曲线，回看得失",
+      "tip": "分析完成后，点击曲线再逐手对照",
+      "media": "review.mp4"
+    },
+    {
+      "id": "preview",
+      "from": 960,
+      "duration": 300,
+      "eyebrow": "04 / 预览候选",
+      "title": "长按，先看后续",
+      "tip": "最多预览七手 · 预览不写入棋谱",
+      "media": "preview.mp4"
+    },
+    {
+      "id": "branches",
+      "from": 1260,
+      "duration": 300,
+      "eyebrow": "05 / 保存变化",
+      "title": "试下，再切换分支",
+      "tip": "历史局面落子 → 变化树切换",
+      "media": "branches.mp4"
+    },
+    {
+      "id": "export",
+      "from": 1560,
+      "duration": 180,
+      "eyebrow": "06 / 导出棋谱",
+      "title": "把思路保存下来",
+      "tip": "三点菜单 → 导出 SGF → 选择保存位置",
+      "media": "export-menu.mp4"
+    }
+  ],
+  "clips": [
+    {
+      "id": "intro",
+      "from": 6,
+      "slotSeconds": 2.6,
+      "text": "一分钟，学会复盘。",
+      "caption": "一分钟，学会复盘"
+    },
+    {
+      "id": "import",
+      "from": 96,
+      "slotSeconds": 6.4,
+      "text": "三点菜单，点导入 SGF，再选择棋谱文件。",
+      "caption": "三点菜单 → 导入 SGF → 选择棋谱"
+    },
+    {
+      "id": "analysis",
+      "from": 312,
+      "slotSeconds": 7.2,
+      "text": "打开 KataGo，开始分析。这里显示的是黑棋胜率。",
+      "caption": "打开 KataGo 分析，胜率采用黑棋视角"
+    },
+    {
+      "id": "chart",
+      "from": 558,
+      "slotSeconds": 6.6,
+      "text": "看到明显转折，点一下曲线，跳到对应手数。",
+      "caption": "点击曲线转折，跳转到对应手数"
+    },
+    {
+      "id": "transport",
+      "from": 774,
+      "slotSeconds": 5.5,
+      "text": "再用上一手、下一手，对照局势变化。",
+      "caption": "用上一手、下一手，对照局势变化"
+    },
+    {
+      "id": "preview",
+      "from": 972,
+      "slotSeconds": 5.4,
+      "text": "长按候选点，预览最多七手变化。",
+      "caption": "长按候选点，预览最多七手变化"
+    },
+    {
+      "id": "exit",
+      "from": 1140,
+      "slotSeconds": 3.6,
+      "text": "看完，退出预览。",
+      "caption": "点「退出预览」，回到原局面"
+    },
+    {
+      "id": "branch",
+      "from": 1271,
+      "slotSeconds": 4.55,
+      "text": "试下新走法，就能建立分支。",
+      "caption": "试下新走法，就能建立分支"
+    },
+    {
+      "id": "tree",
+      "from": 1415,
+      "slotSeconds": 4.5,
+      "text": "打开变化树，点节点切换。",
+      "caption": "打开变化树，点节点切换"
+    },
+    {
+      "id": "export",
+      "from": 1568,
+      "slotSeconds": 5.2,
+      "text": "导出 SGF，保存全部变化。",
+      "caption": "导出 SGF，保存全部变化"
+    }
+  ]
+}
