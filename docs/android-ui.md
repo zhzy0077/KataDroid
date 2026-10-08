@@ -34,7 +34,7 @@ its coordinate looks bad; there must be an engine evaluation.
 
 <img src="images/opening-en.png" width="360" alt="An even opening with three green candidates, each within 0.1 percentage points of the best" />
 
-Tap a candidate to play it. Hold it to preview up to three moves from its search
+Tap a candidate to play it. Hold it to preview up to seven moves from its search
 variation; a pass recommendation has a preview entry in the analysis panel.
 Preview moves do not change the SGF. **Exit preview** or Android Back restores
 the original game position.

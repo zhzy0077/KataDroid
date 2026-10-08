@@ -106,7 +106,7 @@ fun GoBoard(
                     if (event == null) {
                         canLongPress = false; longPressed = true; touchPoint = null
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        candidate?.let { state.startPreview(Candidate(it.label, it.pv.take(3))) }
+                        candidate?.let { state.startPreview(Candidate(it.label, it.pv)) }
                         continue
                     }
                     if (event.changes.any { it.id != down.id && (it.pressed || it.previousPressed) }) break
@@ -200,7 +200,7 @@ fun GoBoard(
                         val winRate = candidate.winRateFor(position.nextPlayer)
                         contentDescription = resources.getString(R.string.candidate_accessibility, candidate.label, point.label, resources.getString(if (position.nextPlayer == 1) R.string.black else R.string.white), winRate.oneDecimal(), candidateWinRateLoss(winRate, bestWinRate).oneDecimal())
                         if (manualInput) onClick(resources.getString(R.string.play_here)) { state.play(candidate.move) }
-                        onLongClick(resources.getString(R.string.preview_variation)) { state.startPreview(Candidate(candidate.label, candidate.pv.take(3))); true }
+                        onLongClick(resources.getString(R.string.preview_variation)) { state.startPreview(Candidate(candidate.label, candidate.pv)); true }
                     },
             )
         }

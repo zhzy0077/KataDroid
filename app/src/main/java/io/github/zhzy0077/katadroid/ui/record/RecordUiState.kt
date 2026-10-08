@@ -125,7 +125,7 @@ class RecordUiState(initialRules: GoRules = GoRules.CHINESE, initialKomi: Float 
     fun pauseAutomatic() { autoPlayArmed = false }
     fun automaticFailed(message: Int) { pauseAutomatic(); moveError = message }
     fun startPreview(candidate: Candidate) {
-        val moves = candidate.moves.take((2000 - basePosition.moves.size).coerceAtLeast(0))
+        val moves = candidate.moves.take(minOf(MAX_PREVIEW_MOVES, (2000 - basePosition.moves.size).coerceAtLeast(0)))
         if (moves.isEmpty()) return
         pauseAutomatic(); preview = candidate.copy(moves = moves); previewStep = moves.size; tab = 0; moveError = null
     }
@@ -215,6 +215,8 @@ class RecordUiState(initialRules: GoRules = GoRules.CHINESE, initialKomi: Float 
             .put("color", n.color).put("depth", n.depth).put("properties", JSONObject(n.properties)) })).toString()
 
     companion object {
+        const val MAX_PREVIEW_MOVES = 7
+
         private fun validateTree(nodes: List<RecordNode>) {
             require(nodes.size in 1..SgfCodec.MAX_NODES)
             val seen = mutableMapOf<String, RecordNode>()
@@ -270,9 +272,12 @@ class RecordUiState(initialRules: GoRules = GoRules.CHINESE, initialKomi: Float 
                 selectedId = json.getString("selected"); routeLeafId = json.getString("leaf"); tab = json.getInt("tab")
                 require(selectedId in byId && routeLeafId in byId && tab in 0..1)
                 require(path(routeLeafId).any { it.id == selectedId })
-                if (json.has("previewLabel")) preview = Candidate(json.getString("previewLabel"), ints("previewMoves"))
+                if (json.has("previewLabel")) {
+                    val moves = ints("previewMoves").also { require(it.size in 1..MAX_PREVIEW_MOVES) }
+                    preview = Candidate(json.getString("previewLabel"), moves)
+                }
                 previewStep = json.getInt("previewStep")
-                require(previewStep in 0..(preview?.moves?.size ?: 3))
+                require(previewStep in 0..(preview?.moves?.size ?: MAX_PREVIEW_MOVES))
                 pauseAutomatic() // Reopening the app must not silently advance an imported/saved game.
                 BoardSnapshot.from(position)
             }

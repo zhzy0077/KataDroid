@@ -30,6 +30,26 @@ class EnglishUiTest {
         ui.runOnIdle { document.updatePreferences(AppPreferences(engineEnabled = false)); document.record.reset() }
     }
 
+    @Test fun sevenMovePreviewKeepsItsEnglishExitControlVisible() {
+        lateinit var document: RecordViewModel
+        val moves = listOf("D16", "Q4", "C16", "R4", "K10", "D4", "Q16")
+            .map { io.github.zhzy0077.katadroid.ui.record.BoardPoint.parse(it).index }
+        ui.runOnIdle {
+            document = ViewModelProvider(ui.activity)[RecordViewModel::class.java]
+            document.updatePreferences(AppPreferences(engineEnabled = false))
+            document.record.newGame()
+            document.record.startPreview(io.github.zhzy0077.katadroid.ui.record.Candidate("A", moves))
+        }
+        ui.onNodeWithText("Exit preview").assertIsDisplayed()
+        val layout = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+        ui.onNodeWithTag("preview-moves").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(layout) }
+        assertFalse(layout.single().hasVisualOverflow)
+        ui.onNodeWithTag("exit-preview").performClick()
+        assertNull(document.record.preview)
+        assertTrue(document.record.position.moves.isEmpty())
+        ui.runOnIdle { document.record.reset() }
+    }
+
     @Test fun englishSettingsApplyAsOneDraftAndGameActionsLiveOnlyInTheMenu() {
         lateinit var document: RecordViewModel
         ui.runOnIdle {

@@ -97,7 +97,7 @@ fun AnalysisPanel(state: RecordUiState, engine: EngineUiState, enabled: Boolean,
             }
             if (preview == null) {
                 val pass = analysis?.candidates?.firstOrNull { it.move == PASS }
-                if (showCandidates && pass != null) TextButton(onClick = { state.startPreview(Candidate(pass.label, pass.pv.take(3))) },
+                if (showCandidates && pass != null) TextButton(onClick = { state.startPreview(Candidate(pass.label, pass.pv)) },
                     modifier = Modifier.testTag("candidate-pass")) { Text(resources.getString(R.string.pass_preview, pass.label), fontSize = 10.sp) }
                 if (enabled && engine.historyAnalyzing) {
                     Text(resources.getString(R.string.history_progress, engine.historyCompleted, engine.historyTotal),
@@ -109,7 +109,9 @@ fun AnalysisPanel(state: RecordUiState, engine: EngineUiState, enabled: Boolean,
                 Row(Modifier.fillMaxWidth().heightIn(min = 36.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(resources.getString(R.string.branch_letter, preview.label), fontSize = 10.sp, color = GoColors.Primary, fontWeight = FontWeight.Medium)
                     Text(preview.moves.take(state.previewStep).mapIndexed { i, move -> "${i + 1} ${BoardPoint.fromIndex(move)?.label ?: resources.getString(R.string.pass_move)}" }
-                        .joinToString(" → ").ifEmpty { resources.getString(R.string.preview_start) }, fontSize = 10.sp, color = GoColors.Muted, maxLines = 1)
+                        .joinToString(" → ").ifEmpty { resources.getString(R.string.preview_start) },
+                        modifier = Modifier.weight(1f).padding(horizontal = 8.dp).testTag("preview-moves"),
+                        fontSize = 10.sp, lineHeight = 14.sp, color = GoColors.Muted, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     TextButton(onClick = state::exitPreview, modifier = Modifier.testTag("exit-preview"),
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp)) { Text(resources.getString(R.string.exit_preview), fontSize = 10.sp) }
                 }
