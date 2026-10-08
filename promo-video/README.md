@@ -2,13 +2,27 @@
 
 独立于 Android 构建的 **Remotion + MiMo TTS** 工程。
 
-| 视频 | 时长 | 画幅 | Composition |
-| --- | ---: | --- | --- |
-| 宣传片正式版 | 54 秒，含片尾 | 1920×1080 · 30 fps | `KataDroid-Promo-ZH` |
-| 一分钟复盘教程 | 58 秒 | 1080×1920 · 30 fps | `KataDroid-Tutorial-ZH` |
-| 风格样片 | 10 秒 | 1920×1080 · 30 fps | `KataDroid-Teaser-ZH` |
+| 视频（MP4，Git LFS） | 时长 | 画幅 | Composition | 字幕 |
+| --- | ---: | --- | --- | --- |
+| [宣传片正式版](videos/katadroid-promo-zh-54s.mp4) | 54 秒，含片尾 | 1920×1080 · 30 fps | `KataDroid-Promo-ZH` | [SRT](videos/promo.zh-CN.srt) |
+| [一分钟复盘教程](videos/katadroid-tutorial-zh-vertical-58s.mp4) | 58 秒 | 1080×1920 · 30 fps | `KataDroid-Tutorial-ZH` | [SRT](videos/tutorial.zh-CN.srt) |
+| [风格样片](videos/katadroid-teaser-zh-1080p.mp4) | 10 秒 | 1920×1080 · 30 fps | `KataDroid-Teaser-ZH` | [SRT](videos/teaser.zh-CN.srt) |
 
 正式版采用最新 APK 的中文 AVD 操作录屏，包含离线分析、候选预览、胜率图跳转、变化树、AI 对弈、SGF 菜单和下载二维码。中文旁白、字幕、轻量氛围音与落子音效均已接入。
+
+## 获取成片
+
+发布成片位于 [`videos/`](videos/)。MP4 使用 Git LFS；字幕、[教程章节](videos/tutorial.chapters.txt)和 [SHA-256 校验清单](videos/SHA256SUMS)使用普通 Git 文本存储。
+
+安装 Git LFS 后，在仓库根目录执行：
+
+```bash
+git lfs install
+git lfs pull --include="promo-video/videos/*.mp4"
+(cd promo-video/videos && sha256sum -c SHA256SUMS)
+```
+
+更新发布成片时，先完成下文的渲染与校验，再从 `.local/output/` 复制对应的 MP4、SRT 和章节文件到 `videos/`，并更新校验清单。原始素材和验证记录继续保存在 `.local/`。
 
 ## 预览与渲染
 
@@ -158,4 +172,4 @@ python3 scripts/capture_avd.py --serial <本次实际的AVD序列号> screenshot
 
 字体由本地 Noto Sans SC 包提供；氛围音和落子声由代码原创合成。MiMo 按用户提供的免费服务使用。
 
-`node_modules/`、音频缓存、录屏、AVD 与生成产物均已忽略。七手预览上限在 App 状态层统一处理，第三方 KataGo 源码保持不变。
+`node_modules/`、音频缓存、原始录屏、AVD 状态与校验报告均已忽略；发布成片和字幕归档在 `videos/`。七手预览上限在 App 状态层统一处理，第三方 KataGo 源码保持不变。

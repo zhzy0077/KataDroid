@@ -8,3 +8,4 @@
 # Keep upstream bytes identical to upstream-files.json.
 third_party/** -text
 app/src/main/assets/licenses/** -text
+promo-video/videos/*.mp4 filter=lfs diff=lfs merge=lfs -text
