@@ -6,19 +6,37 @@
 | --- | ---: | --- | --- | --- |
 | [宣传片正式版](videos/katadroid-promo-zh-54s.mp4) | 54 秒，含片尾 | 1920×1080 · 30 fps | `KataDroid-Promo-ZH` | [SRT](videos/promo.zh-CN.srt) |
 | [一分钟复盘教程](videos/katadroid-tutorial-zh-vertical-58s.mp4) | 58 秒 | 1080×1920 · 30 fps | `KataDroid-Tutorial-ZH` | [SRT](videos/tutorial.zh-CN.srt) |
-| [风格样片](videos/katadroid-teaser-zh-1080p.mp4) | 10 秒 | 1920×1080 · 30 fps | `KataDroid-Teaser-ZH` | [SRT](videos/teaser.zh-CN.srt) |
 
 正式版采用最新 APK 的中文 AVD 操作录屏，包含离线分析、候选预览、胜率图跳转、变化树、AI 对弈、SGF 菜单和下载二维码。中文旁白、字幕、轻量氛围音与落子音效均已接入。
 
+## 视频封面
+
+宣传片正式版和复盘教程各提供两种独立排版的 PNG 封面，画面取自对应成片中的 App 实录。
+
+| 视频 | 16:9 · 1920×1080 | 4:3 · 1440×1080 |
+| --- | --- | --- |
+| 宣传片正式版 | [封面](videos/katadroid-promo-zh-16x9.png) | [封面](videos/katadroid-promo-zh-4x3.png) |
+| 一分钟复盘教程 | [封面](videos/katadroid-tutorial-zh-16x9.png) | [封面](videos/katadroid-tutorial-zh-4x3.png) |
+
+重新生成需要 Python 3、Pillow、FFmpeg 和 Noto Sans CJK 可变字体：
+
+```bash
+python3 scripts/covers.py
+# 自定义字体位置：
+python3 scripts/covers.py --font /path/to/NotoSansCJK-VF.ttc
+```
+
+发布封面位于 `videos/`，使用 Git LFS 存储；中间帧保存在忽略目录 `.local/covers/`。
+
 ## 获取成片
 
-发布成片位于 [`videos/`](videos/)。MP4 使用 Git LFS；字幕、[教程章节](videos/tutorial.chapters.txt)和 [SHA-256 校验清单](videos/SHA256SUMS)使用普通 Git 文本存储。
+发布成片位于 [`videos/`](videos/)。MP4 和 PNG 封面使用 Git LFS；字幕、[教程章节](videos/tutorial.chapters.txt)和 [SHA-256 校验清单](videos/SHA256SUMS)使用普通 Git 文本存储。
 
 安装 Git LFS 后，在仓库根目录执行：
 
 ```bash
 git lfs install
-git lfs pull --include="promo-video/videos/*.mp4"
+git lfs pull --include="promo-video/videos/*.mp4,promo-video/videos/*.png"
 (cd promo-video/videos && sha256sum -c SHA256SUMS)
 ```
 
@@ -50,7 +68,7 @@ npm run verify:final        # 验证总时长、1620 帧、音视频与片尾二
 - `.local/output/promo-01-intro.png` 至 `promo-07-close.png`
 - `.local/output/promo-verification.json`
 
-10 秒样片保留 `tts:sample`、`render:sample`、`render:stills`、`verify:sample` 命令和原输出文件。
+10 秒样片的源工程与本地渲染命令保留，发布目录仅收录正式版和复盘教程。
 
 ## 竖屏复盘教程
 

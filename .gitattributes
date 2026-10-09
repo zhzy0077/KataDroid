@@ -9,3 +9,4 @@
 third_party/** -text
 app/src/main/assets/licenses/** -text
 promo-video/videos/*.mp4 filter=lfs diff=lfs merge=lfs -text
+promo-video/videos/*.png filter=lfs diff=lfs merge=lfs -text
