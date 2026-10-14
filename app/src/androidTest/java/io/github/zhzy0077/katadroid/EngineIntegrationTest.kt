@@ -51,15 +51,18 @@ class EngineIntegrationTest {
                 val actual = session.evaluate(position)
                 val expected = fixture.getJSONObject("outputs")
                 val value = expected.getJSONArray("OutputValue")
-                val currentWin = 1.0 / (1.0 + exp(value.getDouble(1) - value.getDouble(0))) // Chinese rules exclude no-result.
+                val valueMax = (0..2).maxOf { value.getDouble(it) }
+                val categorical = DoubleArray(3) { exp(value.getDouble(it) - valueMax) }
+                val noResult = categorical[2] / categorical.sum()
+                val currentWin = categorical[0] / categorical.sum() + 0.5 * noResult // Chinese simple ko retains no-result.
                 val blackToMove = position.moves.size % 2 == 0
                 val score = expected.getJSONArray("OutputScoreValue")
                 val sign = if (blackToMove) 1.0 else -1.0
                 val winTolerance = if (accelerator == Accelerator.NPU) 1.0 else 0.001
                 val scoreTolerance = if (accelerator == Accelerator.NPU) 0.25 else 0.001
                 assertEquals((if (blackToMove) currentWin else 1 - currentWin) * 100, actual.getDouble("blackWinRate"), winTolerance)
-                assertEquals(sign * score.getDouble(0) * 20, actual.getDouble("blackScoreMean"), scoreTolerance)
-                assertEquals(sign * score.getDouble(2) * 20, actual.getDouble("blackLead"), scoreTolerance)
+                assertEquals(sign * score.getDouble(0) * 20 * (1 - noResult), actual.getDouble("blackScoreMean"), scoreTolerance)
+                assertEquals(sign * score.getDouble(2) * 20 * (1 - noResult), actual.getDouble("blackLead"), scoreTolerance)
                 val owner = expected.getJSONArray("OutputOwnership")
                 for (i in 0..360) assertEquals(-sign * tanh(owner.getDouble(i)), actual.getJSONArray("whiteOwnership").getDouble(i),
                     if (accelerator == Accelerator.NPU) 0.02 else 0.001)

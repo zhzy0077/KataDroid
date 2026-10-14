@@ -1,0 +1,4 @@
+# Standalone portable graph optimizer; no TensorFlow, PyTorch or vendor SDK.
+ai-edge-litert==2.3.0
+flatbuffers==25.12.19
+numpy==2.5.3

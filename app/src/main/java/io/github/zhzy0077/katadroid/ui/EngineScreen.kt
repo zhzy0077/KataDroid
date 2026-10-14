@@ -1,5 +1,9 @@
 package io.github.zhzy0077.katadroid.ui
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalContext
 import android.content.res.Resources
@@ -39,6 +43,25 @@ fun EngineScreen(
     val resources = LocalResources.current
     val context = LocalContext.current
     var visits by rememberSaveable { mutableIntStateOf(500) }
+    var catalogRevision by remember { mutableIntStateOf(0) }
+    var importing by remember { mutableStateOf(false) }
+    var importStatus by remember { mutableStateOf<String?>(null) }
+    val models = remember(catalogRevision) { KataGoModel.entries }
+    val scope = rememberCoroutineScope()
+    val importModel = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) scope.launch {
+            importing = true
+            importStatus = null
+            try {
+                val imported = checkNotNull(context.contentResolver.openInputStream(uri)).use { ModelPackages.install(context, it) }
+                catalogRevision++
+                importStatus = resources.getString(R.string.model_import_complete, imported.sourceName)
+            } catch (error: CancellationException) { throw error }
+            catch (error: Exception) { importStatus = resources.getString(R.string.model_import_failed) }
+            catch (error: LinkageError) { importStatus = resources.getString(R.string.model_import_failed) }
+            finally { importing = false }
+        }
+    }
     val selectedResult = benchmark.resultFor(config)
     val supportsNpu = NpuProbe.hasRuntimeLibraries(context)
     Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)).testTag("engine-screen")) {
@@ -48,7 +71,7 @@ fun EngineScreen(
             SettingsCard {
                 SectionTitle(resources.getString(R.string.katago_models))
                 Column(Modifier.selectableGroup()) {
-                    KataGoModel.entries.forEach { model ->
+                    models.forEach { model ->
                         val result = benchmark.resultFor(config.copy(model = model))
                         Row(Modifier.fillMaxWidth().testTag("model-${model.id}")
                             .selectable(config.model == model, role = Role.RadioButton, onClick = {
@@ -57,7 +80,7 @@ fun EngineScreen(
                             .padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                             RadioButton(selected = config.model == model, onClick = null)
                             Column(Modifier.weight(1f).padding(start = 10.dp)) {
-                                Text(resources.getString(model.titleRes), fontSize = 16.sp, fontWeight = FontWeight.Medium, color = GoColors.Ink)
+                                Text(model.title(resources), fontSize = 16.sp, fontWeight = FontWeight.Medium, color = GoColors.Ink)
                                 Hint(resources.getString(model.descriptionRes))
                                 Hint(result?.let { resources.getString(R.string.previous_speed, decimal(it.visitsPerSecond), it.samples.size, it.visitsPerPosition, it.config.backend.name) }
                                     ?: resources.getString(R.string.model_untested))
@@ -65,6 +88,13 @@ fun EngineScreen(
                         }
                     }
                 }
+                OutlinedButton(onClick = { importModel.launch(arrayOf("application/zip", "application/octet-stream")) },
+                    enabled = !importing && !benchmark.running,
+                    modifier = Modifier.fillMaxWidth().testTag("import-model")) {
+                    Text(resources.getString(if (importing) R.string.model_import_checking else R.string.model_import))
+                }
+                importStatus?.let { Hint(it) }
+                Hint(resources.getString(R.string.model_import_hint))
                 HorizontalDivider(color = GoColors.Outline)
                 Hint(resources.getString(R.string.model_strength_hint))
                 Hint(resources.getString(R.string.model_weights, config.model.sourceName))
@@ -135,7 +165,7 @@ fun EngineScreen(
 
 private fun decimal(value: Double, digits: Int = 1) = String.format(Locale.ROOT, "%.${digits}f", value)
 
-internal fun EngineConfig.displayLabel(resources: Resources) = "${model.id} · ${resources.getString(backend.labelRes)}"
+internal fun EngineConfig.displayLabel(resources: Resources) = "${if (model.directory == null) model.id else model.sourceName} · ${resources.getString(backend.labelRes)}"
 
 internal fun benchmarkCaseLabel(resources: Resources, label: String) = resources.getString(when (label) {
     "empty" -> R.string.case_empty

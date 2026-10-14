@@ -36,6 +36,13 @@ public domain. This exception is specific to g170; do not assume that every newe
 KataGo or community model has the same license. Source URLs and SHA-256 hashes
 are retained in the bundled fixture manifests and the conversion script.
 
+The optional tf2-b10c384, tf3-b10c512 and tf3-b11c768 packages derive from official
+kata1 networks and checkpoints. Their converted graphs and descriptors retain
+the [KataGo Neural Network License](app/src/main/assets/licenses/katago-neural-networks.txt).
+Each published `.kdmodel` embeds this permission notice in `manifest.json`;
+release assets also include a standalone copy. These networks are independent
+of the bundled g170/CC0 models.
+
 ## Build dependencies and optional runtimes
 
 - AndroidX, Jetpack Compose and Google LiteRT use Apache License 2.0. Their own

@@ -89,6 +89,10 @@ Settings → **Engines & models** switches networks and backends immediately. A
 switch cancels old work. **Test performance** measures three fresh searches and
 shows visits/s, initialization and warm-up separately. Auto can fall back to CPU;
 the completed result records the actual backend. See [performance](models-and-benchmarks.md).
+**Import model package** adds a verified `.kdmodel` package through the document
+picker. Import checks hashes, graph boundaries, CPU references and the matching
+KataGo descriptor. Select the imported model explicitly to use it; both bundled
+models remain available. See [package format](model-conversion.md#optional-transformer-packages).
 
 Change the app language under Android Settings → Apps → KataDroid → Language.
 English and Simplified Chinese are included; other system languages use English.

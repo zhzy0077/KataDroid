@@ -24,6 +24,7 @@ jobs:
       - name: Check bundled source and models
         run: |
           python3 tools/check_integrity.py
+          python3 -m pip install -r tools/portable-model-requirements.txt
           python3 -m unittest discover -s tools/tests
       - name: Build and check CPU-capable APK
         run: ./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest --console=plain

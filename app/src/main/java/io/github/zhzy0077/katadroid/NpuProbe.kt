@@ -73,6 +73,8 @@ object NpuProbe {
 
     fun options(context: Context, accelerator: Accelerator): CompiledModel.Options =
         CompiledModel.Options(accelerator).apply {
+            if (accelerator == Accelerator.GPU)
+                gpuOptions = CompiledModel.GpuOptions(precision = CompiledModel.GpuOptions.Precision.FP32)
             if (accelerator == Accelerator.NPU && vendor(context) == Vendor.QUALCOMM)
                 qualcommOptions = CompiledModel.QualcommOptions(logLevel = CompiledModel.QualcommOptions.LogLevel.WARN)
         }

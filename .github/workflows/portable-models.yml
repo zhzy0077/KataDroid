@@ -1,0 +1,40 @@
+name: Portable model tools
+
+on:
+  push:
+    paths:
+      - 'tools/package_model.py'
+      - 'tools/tests/test_package_model.py'
+      - 'tools/optimize_tflite.py'
+      - 'tools/portable-model-requirements.txt'
+      - 'tools/tests/test_optimize_tflite.py'
+      - '.github/workflows/portable-models.yml'
+  pull_request:
+    paths:
+      - 'tools/package_model.py'
+      - 'tools/tests/test_package_model.py'
+      - 'tools/optimize_tflite.py'
+      - 'tools/portable-model-requirements.txt'
+      - 'tools/tests/test_optimize_tflite.py'
+      - '.github/workflows/portable-models.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portable-graphs:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        litert: ['2.2.0', '2.3.0']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: tools/portable-model-requirements.txt
+      - run: python -m pip install -r tools/portable-model-requirements.txt
+      - run: python -m pip install --no-deps ai-edge-litert==${{ matrix.litert }}
+      - run: python -m unittest discover -s tools/tests -v

@@ -11,7 +11,7 @@ object NativeKataGo {
     external fun featuresPosition(position: String): FloatArray
     fun board(position: AnalysisPosition) = boardPosition(position.json().toString())
     fun features(moves: IntArray, komi: Float) = featuresPosition(AnalysisPosition(moves.toList(), komi).json().toString())
-    external fun create(runtime: LiteRtNetwork, modelPath: String, modelName: String): Long
+    external fun create(runtime: LiteRtNetwork, modelPath: String, modelName: String, modelVersion: Int): Long
     external fun destroy(handle: Long)
     external fun setPositionJson(handle: Long, position: String)
     external fun clearSearchAndCache(handle: Long)

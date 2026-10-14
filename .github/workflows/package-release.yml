@@ -50,6 +50,7 @@ jobs:
           (cd dist && awk -v name="KataDroid-$version.apk" '$2 == name || $2 == "./" name' SHA256SUMS > original.sha256 && test -s original.sha256 && sha256sum -c original.sha256)
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "dist/KataDroid-$version.apk"
           python3 tools/check_release_apk.py "dist/KataDroid-$version.apk"
+          python3 -m pip install -r tools/portable-model-requirements.txt
           python3 -m unittest discover -s tools/tests
       - name: Create and verify signed ABI APKs
         env:

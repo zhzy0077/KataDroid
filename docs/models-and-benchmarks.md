@@ -14,9 +14,12 @@ TFLite exports. They are useful lightweight mobile baselines, not the latest or
 strongest KataGo networks. Equal visits do not mean equal thinking time or equal
 strength across networks. See the upstream [g170 network notes](https://katagoarchive.org/g170/neuralnets/README.txt).
 
-The app allows switching these bundled pairs. It does not yet accept arbitrary
-model files; newer architectures may need a different output contract and export
-path. No retraining was needed for these two conversions.
+The app allows switching these bundled pairs and importing optional `.kdmodel`
+packages with a matching descriptor and CPU references. Version-17 PyTorch
+transformer exports use the explicit contract described in
+[model conversion](model-conversion.md#optional-transformer-packages). Importing
+keeps the bundled models and default selection unchanged. Manual GPU mode uses
+FP32 and a context-owning inference thread. Auto retains NPU-then-CPU selection.
 
 ## What visits/s measures
 
@@ -32,7 +35,7 @@ counts are cumulative and counted once. Initialization and warm-up are reported
 separately and excluded from throughput. This is the single-threaded search used
 by the app; serialization, JNI and synchronous inference contribute to its cost.
 
-Models and actual CPU/NPU backends have separate saved results. Leaving the page,
+Models and actual CPU/GPU/NPU backends have separate saved results. Leaving the page,
 cancelling or switching models invalidates an incomplete run. Auto results record
 the backend that actually opened, including CPU fallback.
 

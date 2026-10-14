@@ -1,5 +1,6 @@
 #include <jni.h>
 #include <array>
+#include <cmath>
 #include <atomic>
 #include <mutex>
 #include <memory>
@@ -14,7 +15,13 @@ namespace {
 constexpr int AREA = 361;
 constexpr int SPATIAL = AREA * 22;
 constexpr int GLOBAL = 19;
-constexpr int RAW_OUTPUTS = 730;
+// Versioned Kotlin adapter normalizes both graph ABIs to this RAW-head layout.
+constexpr int POLICY = 0;
+constexpr int OPTIMISTIC_POLICY = 362;
+constexpr int VALUE = 724;
+constexpr int SCORE = 727;
+constexpr int OWNERSHIP = 733;
+constexpr int RAW_OUTPUTS = 1094;
 JavaVM* vm = nullptr;
 std::once_flag initialized;
 
@@ -55,12 +62,14 @@ std::string takeJavaError(JNIEnv* env) {
 struct Bridge {
   jobject runtime;
   const std::string modelName;
+  const int modelVersion;
   jmethodID evaluate;
   std::atomic<bool> failed{false};
   std::mutex errorMutex;
   std::string error;
 
-  Bridge(JNIEnv* env, jobject obj, const std::string& name) : runtime(env->NewGlobalRef(obj)), modelName(name) {
+  Bridge(JNIEnv* env, jobject obj, const std::string& name, int version)
+    : runtime(env->NewGlobalRef(obj)), modelName(name), modelVersion(version) {
     jclass type = env->GetObjectClass(obj);
     evaluate = env->GetMethodID(type, "evaluate", "([F[F)[F");
     env->DeleteLocalRef(type);
@@ -166,6 +175,7 @@ struct ComputeHandle {
   jfloatArray global = nullptr;
   std::array<float, SPATIAL> transformed{};
   std::array<float, RAW_OUTPUTS> raw{};
+  std::array<float, AREA> policy{};
 };
 
 void NeuralNet::globalInitialize() { initialize(); }
@@ -178,9 +188,14 @@ LoadedModel* NeuralNet::loadModelFile(const std::string& path, const std::string
   if (!constructingBridge) throw std::runtime_error("No LiteRT runtime bound to model");
   auto model = std::make_unique<LoadedModel>();
   ModelDesc::loadFromFileMaybeGZipped(path, model->desc, "");
-  if (model->desc.name != constructingBridge->modelName || model->desc.modelVersion != 8 ||
-      model->desc.numInputChannels != 22 || model->desc.numInputGlobalChannels != 19)
-    throw std::runtime_error("LiteRT export and version-8 model descriptor do not match");
+  const auto& desc = model->desc;
+  const int version = constructingBridge->modelVersion;
+  if ((version != 8 && version != 17) || desc.name != constructingBridge->modelName ||
+      desc.modelVersion != version || desc.numInputChannels != 22 || desc.numInputGlobalChannels != 19 ||
+      desc.metaEncoderVersion != 0 || desc.numInputMetaChannels != 0 || desc.numValueChannels != 3 ||
+      desc.numOwnershipChannels != 1 || desc.numScoreValueChannels != (version == 8 ? 4 : 6) ||
+      (version == 8 ? desc.numPolicyChannels != 1 : (desc.numPolicyChannels != 2 && desc.numPolicyChannels != 4)))
+    throw std::runtime_error("LiteRT graph contract and KataGo descriptor do not match");
   model->bridge = constructingBridge;
   return model.release();
 }
@@ -239,19 +254,26 @@ void NeuralNet::getOutput(ComputeHandle* handle, InputBuffers*, int count, NNRes
     // the search stop predicate observes failed and the JNI call throws. These
     // placeholders can never be returned to the UI as a successful analysis.
     const float* raw = handle->raw.data();
-    SymmetryHelpers::copyOutputsWithSymmetry(raw, output->policyProbs, 1, 19, 19, input->symmetry);
-    output->policyProbs[AREA] = raw[361];
-    output->whiteWinProb = raw[362];
-    output->whiteLossProb = raw[363];
-    output->whiteNoResultProb = raw[364];
-    output->whiteScoreMean = raw[365];
-    output->whiteScoreMeanSq = raw[366];
-    output->whiteLead = raw[367];
-    output->varTimeLeft = raw[368];
-    output->shorttermWinlossError = 0;
-    output->shorttermScoreError = 0;
+    // Same optimism interpolation as upstream ONNX/TRT, before inverse symmetry.
+    const float optimism = static_cast<float>(input->policyOptimism);
+    for (int point = 0; point < AREA; point++)
+      handle->policy[point] = raw[POLICY + point] +
+        (raw[OPTIMISTIC_POLICY + point] - raw[POLICY + point]) * optimism;
+    SymmetryHelpers::copyOutputsWithSymmetry(handle->policy.data(), output->policyProbs,
+        1, 19, 19, input->symmetry);
+    output->policyProbs[AREA] = raw[POLICY + AREA] +
+      (raw[OPTIMISTIC_POLICY + AREA] - raw[POLICY + AREA]) * optimism;
+    output->whiteWinProb = raw[VALUE];
+    output->whiteLossProb = raw[VALUE + 1];
+    output->whiteNoResultProb = raw[VALUE + 2];
+    output->whiteScoreMean = raw[SCORE];
+    output->whiteScoreMeanSq = raw[SCORE + 1];
+    output->whiteLead = raw[SCORE + 2];
+    output->varTimeLeft = raw[SCORE + 3];
+    output->shorttermWinlossError = raw[SCORE + 4];
+    output->shorttermScoreError = raw[SCORE + 5];
     if (output->whiteOwnerMap)
-      SymmetryHelpers::copyOutputsWithSymmetry(raw + 369, output->whiteOwnerMap, 1, 19, 19, input->symmetry);
+      SymmetryHelpers::copyOutputsWithSymmetry(raw + OWNERSHIP, output->whiteOwnerMap, 1, 19, 19, input->symmetry);
   }
 }
 
@@ -261,7 +283,8 @@ struct Engine {
   Logger logger;
   std::unique_ptr<NNEvaluator> evaluator;
   std::unique_ptr<Search> search;
-  Engine(JNIEnv* env, jobject runtime, const std::string& path, const std::string& name) : bridge(env, runtime, name) {
+  Engine(JNIEnv* env, jobject runtime, const std::string& path, const std::string& name, int version)
+    : bridge(env, runtime, name, version) {
     ConfigParser config;
     constructingBridge = &bridge;
     try {
@@ -320,8 +343,8 @@ Java_io_github_zhzy0077_katadroid_engine_NativeKataGo_featuresPosition(JNIEnv* e
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_io_github_zhzy0077_katadroid_engine_NativeKataGo_create(JNIEnv* env, jobject, jobject runtime, jstring path, jstring name) {
-  try { initialize(); return reinterpret_cast<jlong>(new Engine(env, runtime, javaString(env, path), javaString(env, name))); }
+Java_io_github_zhzy0077_katadroid_engine_NativeKataGo_create(JNIEnv* env, jobject, jobject runtime, jstring path, jstring name, jint version) {
+  try { initialize(); return reinterpret_cast<jlong>(new Engine(env, runtime, javaString(env, path), javaString(env, name), version)); }
   catch (const std::exception& error) { throwJava(env, error); return 0; }
 }
 
@@ -438,6 +461,10 @@ Java_io_github_zhzy0077_katadroid_engine_NativeKataGo_evaluatePosition(JNIEnv* e
     const auto& out = *buffer.result;
     json result{{"blackWinRate", 100.0 * (out.whiteLossProb + 0.5 * out.whiteNoResultProb)},
         {"blackLead", -out.whiteLead}, {"blackScoreMean", -out.whiteScoreMean},
+        {"scoreStdev", sqrt(std::max(0.0, static_cast<double>(out.whiteScoreMeanSq) -
+          static_cast<double>(out.whiteScoreMean) * out.whiteScoreMean))},
+        {"varianceTime", out.varTimeLeft}, {"shorttermWinlossError", out.shorttermWinlossError},
+        {"shorttermScoreError", out.shorttermScoreError},
         {"policy", std::vector<float>(out.policyProbs, out.policyProbs + AREA + 1)},
         {"whiteOwnership", std::vector<float>(out.whiteOwnerMap, out.whiteOwnerMap + AREA)}};
     return env->NewStringUTF(result.dump().c_str());

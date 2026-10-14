@@ -77,6 +77,8 @@ def main():
     parser.add_argument("--katago", required=True, type=Path)
     parser.add_argument("--model", choices=MODELS, default="b6c96")
     parser.add_argument("--skip-conversion", action="store_true")
+    parser.add_argument("--optimize-portable", action="store_true",
+                        help="Verify portable graph passes on all engine fixtures before publishing")
     args = parser.parse_args()
     katago = args.katago.resolve()
     version = subprocess.check_output([katago, "version"], text=True)
@@ -177,6 +179,19 @@ logToStderr = false
                       "inputs": {k: v.flatten().tolist() for k, v in lite_feed.items()},
                       "outputs": {k: v.flatten().tolist() for k, v in reference_nhwc.items()},
                       "hostCpuMaxErrors": errors})
+    optimization_report = None
+    if args.optimize_portable:
+        from dataclasses import asdict
+        from optimize_tflite import optimize
+        samples = [{name: np.asarray(case["inputs"][name], dtype=detail["dtype"])
+                    .reshape(detail["shape"])
+                    for name, detail in input_details.items()} for case in cases]
+        portable, optimization = optimize(tflite.read_bytes(), samples)
+        portable_path = work / f"{stem}-portable.tflite"
+        portable_path.write_bytes(portable)
+        tflite = portable_path
+        optimization_report = asdict(optimization)
+        print("Portable optimization:", optimization_report, flush=True)
     descriptor = gzip.decompress(source.read_bytes())
     manifest = {"schemaVersion": 1, "modelName": model_name, "sourceUrl": url, "sourceSha256": source_hash,
                 "descriptorName": descriptor.split(b"\n", 1)[0].decode(),
@@ -186,6 +201,8 @@ logToStderr = false
                 "signature": signature,
                 "inputShapes": {k: v["shape"].tolist() for k, v in input_details.items()},
                 "outputShapes": {k: v["shape"].tolist() for k, v in output_details.items()}, "cases": cases}
+    if optimization_report is not None:
+        manifest["portableOptimization"] = optimization_report
     assets = ROOT / "app/src/main/assets/katago"
     assets.mkdir(parents=True, exist_ok=True)
     # Publish assets only after all reference checks have passed.

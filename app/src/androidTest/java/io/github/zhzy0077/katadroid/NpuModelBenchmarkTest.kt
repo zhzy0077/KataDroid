@@ -29,7 +29,7 @@ class NpuModelBenchmarkTest {
         report(raw.display())
         EngineIntegrationTest().verifyOfficialPositions(Accelerator.NPU, KataGoModel.B10)
         report("NPU_SESSION_CLOSED reference")
-        for (model in KataGoModel.entries) {
+        for (model in KataGoModel.bundled) {
             Log.i("KataDroidEngine", "NPU benchmark opening ${model.id}")
             val before = SystemClock.elapsedRealtimeNanos()
             KataGoSession.open(context, Accelerator.NPU, model).use { session ->

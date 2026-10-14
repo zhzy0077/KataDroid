@@ -71,6 +71,7 @@ jobs:
       - name: Check bundled source and models
         run: |
           python3 tools/check_integrity.py
+          python3 -m pip install -r tools/portable-model-requirements.txt
           python3 -m unittest discover -s tools/tests
       - name: Prepare Qualcomm NPU plugins
         run: python3 tools/prepare_npu.py
@@ -136,7 +137,9 @@ jobs:
 
           This build isolates Qualcomm and MediaTek compiler/dispatch libraries so LiteRT loads the selected vendor's NPU runtime. It includes full SGF history analysis followed by continuous selected-position search. Release APKs use increasing Android version codes and the same signing identity to support in-place upgrades.
 
-          Version 1.0.1 fixes importing valid deeply nested SGF files, including OGS exports that wrap each move in a subtree. Parsing now uses an explicit stack while retaining file-size and node-count limits. Regression tests cover deep nesting, branching and malformed input. Device-side SGF tests verified import, navigation through all 176 moves, export/reimport and saved-state restoration of the reported game. This validation does not constitute an NPU execution audit.
+          This version adds optional `.kdmodel` import with checksums, portable-graph validation, CPU references and version-17 KataGo transformer output adapters. Download a model package from the optional transformer release, open Engine → Import model and select it. Bundled models and defaults remain unchanged. Manual GPU inference uses FP32 and CPU-reference checks. Both bundled models passed physical GPU correctness/native-postprocessing checks; remaining rank-five tensors block the tested transformer's LiteRT 2.2 GPU compilation. Optional transformer acceptance currently covers CPU references on three positions and eight symmetries; accelerated transformer qualification remains separate.
+
+          Optional model assets on the v1.1.0-rc.1 release: tf2-b10c384-s2941M-d5872M.kdmodel (~82 MiB), tf3-b10c512-s3203M-d5937M.kdmodel (~199 MiB), and tf3-b11c768-s11003M-d5973M-7gres.kdmodel (~528 MiB). Install the compatible APK first, download one package, then use Engine → Import model. Start with CPU. Raw upstream .bin.gz files require conversion before import. MODEL_SHA256SUMS verifies model downloads; KATAGO_MODEL_LICENSE.txt and each package manifest carry the upstream network license. The largest model needs substantially more runtime memory than its compressed download size.
 
           Compatibility reports are welcome: include phone model, SoC, Android version, model, actual backend and benchmark visits/s. See README.md for measured results and reporting details.
           NOTES

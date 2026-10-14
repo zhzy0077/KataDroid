@@ -21,7 +21,7 @@ class ModelBenchmarkTest {
 
     @Test
     fun bothCpuModelsCompleteFreshRealSearchBenchmarks() {
-        for (model in KataGoModel.entries) {
+        for (model in KataGoModel.bundled) {
             val config = EngineConfig(model, EngineBackend.CPU)
             val before = SystemClock.elapsedRealtimeNanos()
             KataGoSession.open(context, Accelerator.CPU, model).use { session ->
